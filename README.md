@@ -1,4 +1,3 @@
 identifier
-==========
-
-Identifier generator
+=============
+sudo apt-get install ghostscript

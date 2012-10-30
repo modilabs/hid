@@ -3,7 +3,5 @@ requests
 south
 django-extensions
 django-reversion
-ghostscript
-PIL
+pillow
 elaphe
-
