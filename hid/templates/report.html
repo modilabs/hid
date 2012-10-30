@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+        {% if batch_list %}
+        <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th>Site</th>
+            <th>Date </th>
+            <th>Requested </th>
+            <th>Used </th>
+            <th>#</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in batch_list %}
+        <tr>
+            <td>{{ item.site.name }}</td>
+            <td>{{ item.generated_on }}</td>
+            <td>{{ item.total_requsted }}</td>
+            <td>{{ item.site }}</td>
+            <td><a href="{% url printbatch item.pk %}" class="btn btn-info btn-mini"><i class="icon-print"></i>&nbsp;{% trans "Print View" %}</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

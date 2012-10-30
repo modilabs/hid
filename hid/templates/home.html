@@ -4,8 +4,35 @@
 {% block content %}
 
 <div>
-    <a href="#" class="btn">Add Sites</a>
+    <a href="{% url request-id %}" class="btn">Request IDs</a>
 </div>
 
-    
+<div class="row">
+     <div class="span3">
+       <h1 class="short">{{ total }}</h1>
+     </div>
+     <div class="span2">
+       <h1>{{ unused }}</h1>
+     </div>
+     <div class="span2">
+       <h1 class="short">{{ issued }}</h1>
+     </div>
+      <div class="span2">
+       <h1 class="short">{{ printed }}</h1>
+     </div>
+</div>
+<div class="row">
+     <div class="span3">
+       <h1><small>Generated</small></h1>
+     </div>
+     <div class="span2">
+       <h1><small>Unused</small></h1>
+     </div>
+     <div class="span2">
+       <h1><small>Issued</small></h1>
+     </div>
+     <div class="span2">
+       <h1><small>Printed</small></h1>
+     </div>
+</div>
 {% endblock %}

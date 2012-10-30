@@ -2,8 +2,10 @@
 # maintainer: katembu
 
 import math
+import random
 
 VALID_CHARS = "0123456789ACDEFGHJKLMNPRTUVWXY"
+LEN = 4
 
 
 def getBaseCharacters():
@@ -11,31 +13,37 @@ def getBaseCharacters():
     return VALID_CHARS
 
 
+def getIdentifierLength():
+    '''Return Identifier Length'''
+    return LEN
+
+
 def generate(id_without_check):
-    checkdigit = checkDigit(id_without_check)
-    identifier = id_without_check+checkdigit
+    '''Append Check digit '''
+    checkdigit = computeCheckDigit(id_without_check)
+    return id_without_check + checkdigit
 
 
 def computeCheckDigit(identifier):
         '''Compute CheckDigit for a passed identifier'''
         valid_chars = getBaseCharacters()
         mod = len(valid_chars)
-          
+        print identifier
+
         # remove leading or trailing whitespace, convert to uppercase
         identifier = identifier.strip().upper()
-         
-        # this will be a running total
-        sum = 0;
-        
+
+        #this will be a running total
+        sum = 0
+
         # loop through digits from right to left
         for n, char in enumerate(reversed(identifier)):
-             
             if not valid_chars.count(char):
                 raise Exception('InvalidIDException')
-             
-            # Point 
+
+            # Point
             code_point = valid_chars.index(char)
-              
+
             # weight will be the current digit's contribution to
             # the running total
             weight = None
@@ -44,36 +52,40 @@ def computeCheckDigit(identifier):
             else:
                 weight = code_point
 
-            weight = (weight/mod)+(weight%mod)    
+            weight = (weight / mod) + (weight % mod)
             # keep a running total of weights
             sum += weight
 
         # return check digit
-        remainder = sum % mod;
-        checkCodePoint = mod - remainder;
-        return valid_chars[checkCodePoint];
+        remainder = sum % mod
+        checkCodePoint = mod - remainder
+        print remainder
+        print checkCodePoint
+        try:
+            checkdigit = valid_chars[checkCodePoint]
+        except:
+            checkdigit = valid_chars[0]
+
+        return checkdigit
 
 
 def validateCheckDigit(identifier):
         '''Compute CheckDigit for a passed identifier'''
         valid_chars = getBaseCharacters()
         mod = len(valid_chars)
-          
+
         # remove leading or trailing whitespace, convert to uppercase
         identifier = identifier.strip().upper()
-         
+
         # this will be a running total
-        sum = 0;
-        
+        sum = 0
         # loop through digits from right to left
         for n, char in enumerate(reversed(identifier)):
-             
             if not valid_chars.count(char):
                 raise Exception('InvalidIDException')
-             
-            # Point 
+
+            # Point
             code_point = valid_chars.index(char)
-              
             # weight will be the current digit's contribution to
             # the running total
             weight = None
@@ -82,10 +94,17 @@ def validateCheckDigit(identifier):
             else:
                 weight = (2 * code_point)
 
-            weight = (weight/mod)+(weight%mod)    
+            weight = (weight / mod) + (weight % mod)
             # keep a running total of weights
             sum += weight
 
         # return check digit
-        remainder = sum % mod;
-        return (remainder==0)
+        remainder = sum % mod
+        return (remainder == 0)
+
+
+def generateIdentifier():
+    char = getBaseCharacters()
+    slen = getIdentifierLength()
+    identifier = ''.join([random.choice(char) for i in range(0, slen - 1)])
+    return generate(identifier)

@@ -3,3 +3,4 @@ requests
 south
 django-extensions
 django-reversion
+elaphe
