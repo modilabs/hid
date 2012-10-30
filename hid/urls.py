@@ -9,7 +9,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', views.index, name='dashboard'),
-
+    url(r'^home/?$', views.index),
+    
     url(r'^login/$', 'hid.views.login_greeter', name='login'),
     url(r'^logout/$', 'django.contrib.auth.views.logout',
         {'template_name': 'logout.html', 'next_page': '/'}, name='logout'),
