@@ -1,8 +1,14 @@
 # encoding=utf-8
 # maintainer: katembu
 
+
+import os
+from urlparse import urlparse
+import httplib
 import math
 import random
+
+from datetime import datetime
 
 VALID_CHARS = "0123456789ACDEFGHJKLMNPRTUVWXY"
 LEN = 4
@@ -108,3 +114,24 @@ def generateIdentifier():
     slen = getIdentifierLength()
     identifier = ''.join([random.choice(char) for i in range(0, slen - 1)])
     return generate(identifier)
+
+  
+def transmit_form(form):
+    ''' Submit data to commcare server '''
+    xml_form = form.data
+    headers = {"Content-type": "text/xml", "Accept": "text/plain"}
+    url = form.COMMCARE_URL
+    SUBMIT_CASEXML = form.SUBMIT_TO_COMMCARE
+
+    if SUBMIT_CASEXML:
+        print url
+        up = urlparse(url)
+        conn = httplib.HTTPSConnection(up.netloc) if url.startswith("https") \
+                                        else httplib.HTTPConnection(up.netloc)
+        conn.request('POST', up.path, xml_form, headers)
+        resp = conn.getresponse()
+        responsetext = resp.read()
+        if resp.status == 201:
+            print "Bad HTTP Response: %s " % responsetext
+        else:
+            print "Thanks for submitting %s Bad response text" % responsetext

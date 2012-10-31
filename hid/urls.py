@@ -19,6 +19,7 @@ urlpatterns = patterns('',
         name='request-id'),
     url(r'^report/?$', 'hid.views.batch_list',
         name='report'),
+    url(r'^getid/(?P<mvp_site>[^/]+)$', 'hid.views.getid'),
     url(r'^print_batch/(?P<batchid>[^/]+)$',
         'hid.views.print_identifier', name='printbatch'),
     # Uncomment the admin/doc line below to enable admin documentation:

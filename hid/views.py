@@ -8,6 +8,7 @@ from django.conf import settings
 from django.http import HttpResponseNotFound, HttpResponse, \
     HttpResponseRedirect
 from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -102,7 +103,21 @@ def print_identifier(request, batchid):
 def batch_list(request):
     context = RequestContext(request)
     batch_list = IdentifierRequest.objects.all()
-    
+
     context.update({'batch_list': batch_list})
 
     return render(request, "report.html", context_instance=context)
+
+
+@csrf_exempt
+@require_POST
+def getid(request, mvp_site):
+    '''Get requests from Commcare check if they have HID and resubmit again '''
+    try:
+        batch = Site.objects.get(slug=mvp_site)
+    except Site.DoesNotExist:
+        return HttpResponse(_(u"Site %s is not configured") % mvp_site)
+        
+    data = request.raw_post_data
+    print data
+    ''' Check if HID field is not blank '''

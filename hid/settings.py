@@ -155,3 +155,14 @@ LOGGING = {
         },
     }
 }
+
+
+#COMMCARE DOMAIN URL
+COMMCARE_URL = "https://www.commcarehq.org/a/%s/receiver/"
+SUBMIT_TO_COMMCARE = True
+
+try:
+    from local_settings import *
+except ImportError:
+    print("You can override the default settings by adding a "
+          "local_settings.py file.")
