@@ -73,6 +73,7 @@ class IdentifierRequest(models.Model):
         app_label = "hid"
         verbose_name = _(u"Identifier Request")
         verbose_name_plural = _(u"Identifier Request")
+        ordering = ['-pk']
 
     created_on = models.DateTimeField(_(u"Created on"), auto_now_add=True,
                                       db_index=True)
