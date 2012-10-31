@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'south',
     'hid',
+    'logger_ng',
 )
 
 LOGIN_URL = '/login/'
