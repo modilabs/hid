@@ -20,6 +20,7 @@ from hid.barcode import b64_qrcode
 from hid.models import Identifier, Site
 from hid.forms import *
 
+from logger_ng.models import LoggedMessage
 
 @login_required
 def index(request):
@@ -114,10 +115,15 @@ def batch_list(request):
 def getid(request, mvp_site):
     '''Get requests from Commcare check if they have HID and resubmit again '''
     try:
-        batch = Site.objects.get(slug=mvp_site)
+        site = Site.objects.get(slug=mvp_site)
     except Site.DoesNotExist:
         return HttpResponse(_(u"Site %s is not configured") % mvp_site)
         
     data = request.raw_post_data
+    s = LoggedMessage()
+    s.text = data
+    s.direction = s.DIRECTION_INCOMING
+    s.site = site
+    s.save()
     print data
     ''' Check if HID field is not blank '''

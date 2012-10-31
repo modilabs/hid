@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Message Log{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="/static/logger_ng/js/jquery-1.4.2.js"></script><!-- needs ability to parseJSON -->
+<script type="text/javascript" src="/static/logger_ng/js/jquery.buildin.js"></script>
+<script type="text/javascript" src="/static/logger_ng/js/logger_reply.js"></script>
+<script type="text/javascript" src="/static/logger_ng/js/jquery.buildin.templates.js"></script>
+{% endblock %}
+
+
+{% block page_stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/logger_ng/css/sms-replies.css" />
+<link rel="stylesheet" type="text/css" href="/static/logger_ng/css/style.css" />
+{% endblock %}
+
+{% block content %}
+
+<h2>Incoming Message Log</h2>
+
+
+<div id="ajax-logger" style="display:none">
+	<table class='msgs'></table>
+</div>
+<div id="non-ajax-message-list">
+{% for msg in msgs.object_list %}
+
+<script type="text/javascript">
+<!--
+messageBuffer.push({{msg.to_json|safe}})
+-->
+</script>
+
+<div class="lng_msg">
+    <div class="details">
+        <span class="date">{{msg.date|date:"d-M-Y @ H:m:s"}}</span>
+        <span class="from">{{msg.ident_string}}</span>
+    </div>
+    <div class="msg {% if msg.is_incoming %}text{% else %}response{% endif %}">{{msg.text}}</div>
+    {% for response in msg.response.all %}
+        <div class="msg response">{{response.text}}</div>
+    {% endfor %}
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<table class="lng_page">
+<tr><td>
+        {% if msgs.has_previous %}
+            <a href="?page={{ msgs.previous_page_number }}">Previous</a>
+        {% endif %}
+</td><td>
+            Page <span id="page_number">{{ msgs.number }}</span> of {{ msgs.paginator.num_pages }}
+</td><td>
+        {% if msgs.has_next %}
+            <a href="?page={{ msgs.next_page_number }}">Next</a>
+        {% endif %}
+</td></tr>
+</table>
+
+{% endblock %}
