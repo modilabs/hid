@@ -1,8 +1,59 @@
+
 body {
-	padding-top: 60px;
-	padding-bottom: 40px;
+  background: white;
+  font-size: 12pt;
+  }
+
+#menu, div.navbar {
+  display: none;
+  }
+
+#content {
+  width: auto;
+  margin: 0 5%;
+  padding: 0;
+  border: 0;
+  float: none !important;
+  color: black;
+  background: transparent none;
+  }
+
+div#content {
+  margin-left: 5%;
+  padding-top: 1em;
+  border-top: 1px solid #930;
+  }
+
+a:link, a:visited {
+  color: #520;
+  background: transparent;
+  font-weight: bold;
+  text-decoration: underline;
+  }
+
+#content a:link:after, #content a:visited:after {
+  content: " (" attr(href) ") ";
+  font-size: 90%;
+  }
+
+/* IDgen specifics */
+body * h1, body * p.notice, body * hr {
+    display: none;
 }
 
-.sidebar-nav {
-	padding: 9px 0;
+body  * th.qrcol, body * td.qrcol {
+    width: 120px;
+}
+
+body * table {
+    width: 100%;
+}
+
+body * td {
+    vertical-align: top;
+    border: 1px solid black;
+}
+
+body * thead {
+    display: none;
 }
