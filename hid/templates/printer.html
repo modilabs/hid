@@ -2,9 +2,9 @@
 {% load i18n %}
 
 {% block content %}
-
-<p class="notice">{% trans "Use the print function of your Web browser." %}</p>
-
+<p class="notice alert alert-success">
+<strong> {% trans "Use the print function of your Web browser." %} </strong>
+</p>
 {% if generated_ids %}
 
 {% for id in generated_ids %}
