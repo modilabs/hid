@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     
     url(r'^login/$', 'hid.views.login_greeter', name='login'),
     url(r'^logout/$', 'django.contrib.auth.views.logout',
-        {'template_nmicame': 'logout.html', 'next_page': '/'}, name='logout'),
+        {'template_name': 'logout.html', 'next_page': '/'}, name='logout'),
 
     url(r'^request-id/?$', 'hid.views.request_identifier',
         name='request-id'),
