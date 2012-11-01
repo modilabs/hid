@@ -79,13 +79,16 @@ class IdentifierRequest(models.Model):
                                       db_index=True)
     updated_on = models.DateTimeField(auto_now=True)
     site = models.ForeignKey(Site)
-    total_requsted = models.IntegerField(max_length=11, 
+    total_requsted = models.IntegerField(max_length=11,
                                          verbose_name=_(u"Total Requested"))
     description = models.TextField(blank=True, null=True,
                                    verbose_name=_(u"description"))
 
     def __unicode__(self):
         return u'%s >> %s' % (self.site.name, self.total_requsted)
+
+    def used(self):
+        return self.identifierprinted_set.filter(identifier__status=Identifier.STATUS_ISSUED)
 
 reversion.register(IdentifierRequest)
 
