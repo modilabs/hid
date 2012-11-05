@@ -9,3 +9,4 @@ from hid.models import Site, Identifier, IdentifierRequest
 admin.site.register(Site)
 admin.site.register(Identifier)
 admin.site.register(IdentifierRequest)
+admin.site.register(SitesUser)

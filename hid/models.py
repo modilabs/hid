@@ -106,6 +106,19 @@ class IdentifierPrinted(models.Model):
 reversion.register(IdentifierPrinted)
 
 
+class SitesUser(models.Model):
+    class Meta:
+        app_label = "hid"
+        verbose_name = _(u"User")
+        verbose_name_plural = _(u"Users")
+
+    site = models.ForeignKey(Site, verbose_name=_(u"Assigned Site"))
+    user = models.ForeignKey(User, verbose_name=_(u"User"))
+
+    def __unicode__(self):
+        return self.user.username
+
+
 def print_identifiers(sender, **kwargs):
     obj = kwargs['instance']
     requested_id = obj.total_requsted
