@@ -109,8 +109,9 @@ reversion.register(IdentifierPrinted)
 class SitesUser(models.Model):
     class Meta:
         app_label = "hid"
-        verbose_name = _(u"User")
-        verbose_name_plural = _(u"Users")
+        verbose_name = _(u"User Assigned Site")
+        verbose_name_plural = _(u"User Assigned Sites")
+        unique_together = ('site', 'user')
 
     site = models.ForeignKey(Site, verbose_name=_(u"Assigned Site"))
     user = models.ForeignKey(User, verbose_name=_(u"User"))

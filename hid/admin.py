@@ -4,7 +4,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from hid.models import Site, Identifier, IdentifierRequest
+from hid.models import Site, Identifier, IdentifierRequest, SitesUser
 
 admin.site.register(Site)
 admin.site.register(Identifier)
