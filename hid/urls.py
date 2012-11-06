@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     url(r'^incoming/?$', view.index, name='loggerng-index'),
     
     url(r'^login/$', 'hid.views.login_greeter', name='login'),
+    url(r'^mysite/$', 'hid.views.mysite', name='selectsite'),
     url(r'^logout/$', 'django.contrib.auth.views.logout',
         {'template_name': 'logout.html', 'next_page': '/'}, name='logout'),
 
