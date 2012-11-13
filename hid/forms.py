@@ -12,6 +12,7 @@ class IdentifierForm(ModelForm):
 
     class Meta:
         model = IdentifierRequest
+        exclude = ('site',)
 
 
 class SiteChoice(forms.Form):

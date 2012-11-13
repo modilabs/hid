@@ -57,6 +57,7 @@ def login_greeter(request):
 @site_required
 def request_identifier(request):
     context = RequestContext(request)
+    site=request.session.get('assigned_site')
     form = IdentifierForm()
     if request.POST:
         form = IdentifierForm(request.POST)
@@ -66,9 +67,7 @@ def request_identifier(request):
             if requested_id > unused:
                 context.error = _(u"Only %d Identifiers are available. \
                                     Please request less Identifiers") % unused
-            rsite = form.cleaned_data['site']
-            print rsite
-            site = Site.objects.get(slug=rsite)
+            site = Site.objects.get(slug=site)
             c = IdentifierRequest()
             c.site = site
             c.total_requsted = requested_id
@@ -108,7 +107,7 @@ def print_identifier(request, batchid):
 @site_required
 def batch_list(request):
     context = RequestContext(request)
-    site = request.session['assigned_site']
+    site = request.session.get('assigned_site')
     batch_list = IdentifierRequest.objects.filter(site__pk=site)
 
     context.update({'batch_list': batch_list})
