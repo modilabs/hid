@@ -5,3 +5,5 @@ django-extensions
 django-reversion
 pillow
 elaphe
+lxml
+beautifulsoup4
