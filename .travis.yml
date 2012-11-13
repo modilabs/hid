@@ -10,4 +10,4 @@ install:
 script:
   - python manage.py test --noinput
 notifications:
-  irc: "irc.freenode.org#moditest"s
+  irc: "irc.freenode.org#moditest"
