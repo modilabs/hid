@@ -1,0 +1,13 @@
+language: python
+python:
+  - "2.7"
+before_install:
+  - sudo apt-get install ghostscript
+install:
+  - pip install -r requirements.pip --use-mirrors
+  - python manage.py syncdb --noinput
+  - python manage.py migrate --noinput
+script:
+  - python manage.py test --noinput
+notifications:
+  irc: "irc.freenode.org#moditest"s
