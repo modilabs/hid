@@ -1,5 +1,16 @@
-
-body {
-    padding-top: 60px;
+.row-fluid .span2  {
+    width: 230px;
+    height: 260px;
 }
 
+.row-fluid .thumbnail {
+    width: 230px;
+    height: 260px;
+    margin: 5px;
+}
+
+.row-fluid h3 {
+    text-align: center;
+    margin: auto;
+    line-height: 20px;
+}

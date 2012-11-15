@@ -5,45 +5,51 @@
 <p class="notice alert alert-success">
 <strong> {% trans "Use the print function of your Web browser." %} </strong>
 </p>
+<div class="row-fluid">
 {% if generated_ids %}
-
+<ul class="thumbnails">
 {% for id in generated_ids %}
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   version="1.1"
-   width="607.54224"
-   height="282.92038"
-   id="svg2">
-  <defs
-     id="defs4" />
-  <metadata
-     id="metadata7">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <image
-       xlink:href="data:image/png;base64,{{ id.1 }}
-"
-       width="226"
-       height="226"
-       alt="{{ id.0 }}"
-       title="{{ id.0 }}"
-       id="image5112" />
-  
-</svg>
+    <li class="span2">
+    <div class="thumbnail">
+    <svg
+       xmlns:dc="http://purl.org/dc/elements/1.1/"
+       xmlns:cc="http://creativecommons.org/ns#"
+       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+       xmlns:svg="http://www.w3.org/2000/svg"
+       xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1"
+       width="230"
+       height="230"
+       id="svg2">
+      <defs
+         id="defs4" />
+      <metadata
+         id="metadata7">
+        <rdf:RDF>
+          <cc:Work
+             rdf:about="">
+            <dc:format>image/svg+xml</dc:format>
+            <dc:type
+               rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+            <dc:title></dc:title>
+          </cc:Work>
+        </rdf:RDF>
+      </metadata>
+      <image
+           xlink:href="data:image/png;base64,{{ id.1 }}"
+           width="226"
+           height="226"
+           alt="{{ id.0 }}"
+           title="{{ id.0 }}"
+           id="image5112" />
+    </svg>
+        <h3>{{ id.0 }}</h3>
+    </div>
+    </li>
+
 {% endfor %}
+</ul>
 {% endif %}
-    
+</div>
 {% endblock %}
