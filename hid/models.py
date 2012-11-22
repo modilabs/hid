@@ -2,6 +2,7 @@
 # maintainer: katembu
 
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.db.models.signals import post_save, pre_save
@@ -67,6 +68,39 @@ class Identifier(models.Model):
 reversion.register(Identifier)
 
 
+class HealthIDs(models.Model):
+    '''
+    Childcount HealthIDS already generated
+    This are all IDS issued to various MVP sites. The reason for this is
+    to prevent double issuance of IDs for the same location
+    '''
+    class Meta:
+        app_label = 'hid'
+        verbose_name = _(u"CC+ HID Issued")
+        verbose_name_plural = _(u"CC+ HID Issued to sites")
+
+    STATUS_GENERATED = 'G'
+    STATUS_PRINTED = 'P'
+    STATUS_ISSUED = 'I'
+    STATUS_REVOKED = 'R'
+
+    STATUS_CHOICES = (
+        (STATUS_GENERATED, _(u"Generated")),
+        (STATUS_PRINTED, _(u"Printed")),
+        (STATUS_ISSUED, _(u"Issued")),
+        (STATUS_REVOKED, _(u"Revoked")))
+
+    identifier = models.CharField(_(u"Identifier"), max_length=10)
+    site = models.ManyToManyField(Site, related_name="assigned_sites",
+                                  verbose_name=_(u"Assigned Site"))
+    status = models.CharField(_(u"Status"), choices=STATUS_CHOICES,
+                              max_length=1, default=STATUS_GENERATED)
+
+    def __unicode__(self):
+        return u"%s >> %s" % (self.identifier, 
+                              ", ".join(site.name for site in self.site.all()))
+
+
 class IdentifierRequest(models.Model):
 
     class Meta:
@@ -123,7 +157,9 @@ class SitesUser(models.Model):
 def print_identifiers(sender, **kwargs):
     obj = kwargs['instance']
     requested_id = obj.total_requsted
-    _all = Identifier.unusedIdentifiers()[:requested_id]
+    site = Site.objects.get(site__pk=obj.site)
+    z = HealthIDs.objects.filter(site=site)
+    _all = Identifier.unusedIdentifiers().filter(~Q(identifier__in=z))[:requested_id]
     for j in _all:
         j.status = Identifier.STATUS_PRINTED
         j.save()
