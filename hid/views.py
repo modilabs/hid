@@ -149,8 +149,6 @@ def mysite(request):
 
 @csrf_exempt
 @require_POST
-@login_required
-@site_required
 def getid(request, mvp_site):
     '''Get request from Commcare check if they have HID and resubmit again '''
     try:
