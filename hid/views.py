@@ -11,12 +11,13 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
-from django.template import RequestContext
+from django.template import RequestContefxt
 from django.utils.translation import ugettext as _
 from hid.barcode import b64_qrcode
 
 from hid.models import Identifier, Site
 from hid.forms import *
+from hid.utils import *
 
 from logger_ng.models import LoggedMessage
 from hid.decorators import site_required
@@ -162,5 +163,10 @@ def getid(request, mvp_site):
     s.direction = s.DIRECTION_INCOMING
     s.site = site
     s.save()
+    #inject ID
+    if sanitise_case(site, data):
+        print "Hurray"
+    else:
+        print "checking"
     print data
     ''' Check if HID field is not blank '''
