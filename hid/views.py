@@ -11,7 +11,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
-from django.template import RequestContefxt
+from django.template import RequestContext
 from django.utils.translation import ugettext as _
 from hid.barcode import b64_qrcode
 
