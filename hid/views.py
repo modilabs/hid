@@ -17,6 +17,7 @@ from hid.barcode import b64_qrcode
 
 from hid.models import Identifier, Site
 from hid.forms import *
+from hid.utils import *
 
 from logger_ng.models import LoggedMessage
 from hid.decorators import site_required
@@ -162,5 +163,10 @@ def getid(request, mvp_site):
     s.direction = s.DIRECTION_INCOMING
     s.site = site
     s.save()
+    #inject ID
+    if sanitise_case(site, data):
+        print "Hurray"
+    else:
+        print "checking"
     print data
     ''' Check if HID field is not blank '''

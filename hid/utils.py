@@ -1,12 +1,13 @@
 # encoding=utf-8
 # maintainer: katembu
 
-
 import os
 from urlparse import urlparse
 import httplib
 import math
 import random
+
+from bs4 import BeautifulSoup as soup
 
 from datetime import datetime
 
@@ -135,3 +136,77 @@ def transmit_form(form):
             print "Bad HTTP Response: %s " % responsetext
         else:
             print "Thanks for submitting %s Bad response text" % responsetext
+
+
+def valid_hid(hid):
+    ''' Check if HID is Valid '''
+    try:
+        m = Identifier.objects.get(identifier=hid)
+    except Identifier.DoesNotExist:
+        m = False
+    return m
+
+
+def old_valid_hid(hid, site):
+    ''' Check if HID exists in previous CHILDCOUNT IDs '''
+    try:
+        m = HealthIDs.objects.get(identifier=hid, site=site)
+    except HealthIDs.DoesNotExist:
+        m = False
+    return m
+
+
+def sanitise_case(site, data):
+    soup = soup(data, 'xml')
+    #check if case type exist
+    try:
+        m = soup.find('case_type')
+        s = m.text.lower()
+        valid = True
+    except:
+        valid = False
+
+    '''
+    If case_type exist check case type.
+    Household Registration Form has different name tag for variable storing
+    '''
+    if valid:
+        old_hid = False
+        if s == 'household':
+            try:
+                m = soup.find('household_head_health_id')
+                old_hid = m.text.upper()
+            except:
+                return False
+
+            return checkhid(old_hid, site)
+        else:
+            try:
+                m = soup.find('health_id')
+                old_hid = m.text.upper()
+            except:
+                return False
+            return checkhid(old_hid, site)
+    else:
+        '''
+        update form to indicate that it was not processed because it did
+        not specify have case_type
+        '''
+        return False
+
+
+def checkhid(hid, site):
+
+    if old_valid_hid(hid, site):
+        #Check if HID exist in childcount hid pool.
+        print "Child count"
+    elif valid_hid(hid):
+        print "identidfier"
+        new = valid_hid(hid)
+        if new.status == Identifier.STATUS_GENERATED:
+            new.status = STATUS_ISSUED
+            new.save()
+        #check if HID exist in new generated IDs
+    else:
+        print "else"
+        #get a new HID from POOL and assign
