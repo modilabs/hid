@@ -34,40 +34,16 @@ class Identifier(models.Model):
         verbose_name = _(u"Identifier")
         verbose_name_plural = _(u"Identifiers")
 
-    STATUS_GENERATED = 'G'
-    STATUS_PRINTED = 'P'
-    STATUS_ISSUED = 'I'
-    STATUS_REVOKED = 'R'
-
-    STATUS_CHOICES = (
-        (STATUS_GENERATED, _(u"Generated")),
-        (STATUS_PRINTED, _(u"Printed")),
-        (STATUS_ISSUED, _(u"Issued")),
-        (STATUS_REVOKED, _(u"Revoked")))
-
     identifier = models.CharField(_(u"Identifier"), max_length=10, unique=True)
     generated_on = models.DateTimeField(_(u"Generated on"), auto_now_add=True)
-    printed_on = models.DateTimeField(_(u"Printed on"), blank=True, null=True)
-    issued_on = models.DateTimeField(_(u"Issued on"), blank=True, null=True)
-    revoked_on = models.DateTimeField(_(u"Revoked on"), blank=True, null=True)
-    status = models.CharField(_(u"Status"), choices=STATUS_CHOICES,
-                              max_length=1, default=STATUS_GENERATED)
 
     def __unicode__(self):
         return u"%s" % self.identifier
 
-    @classmethod
-    def unusedIdentifiers(cls):
-        return cls.objects.filter(status=cls.STATUS_GENERATED)
-
-    @classmethod
-    def issuedIdentifiers(cls):
-        return cls.objects.filter(status=cls.STATUS_ISSUED)
-
 reversion.register(Identifier)
 
 
-class HealthIDs(models.Model):
+class IssuedIdentifier(models.Model):
     '''
     Childcount HealthIDS already generated
     This are all IDS issued to various MVP sites. The reason for this is
@@ -89,15 +65,17 @@ class HealthIDs(models.Model):
         (STATUS_ISSUED, _(u"Issued")),
         (STATUS_REVOKED, _(u"Revoked")))
 
-    identifier = models.CharField(_(u"Identifier"), max_length=10)
-    site = models.ManyToManyField(Site, related_name="assigned_sites",
-                                  verbose_name=_(u"Assigned Site"))
+    identifier = models.ForeignKey(Identifier, max_length=10)
+    site = models.ForeignKey(Site, related_name="assigned_sites",
+                             verbose_name=_(u"Assigned Site"))
+    printed_on = models.DateTimeField(_(u"Printed on"), blank=True, null=True)
+    issued_on = models.DateTimeField(_(u"Issued on"), blank=True, null=True)
+    revoked_on = models.DateTimeField(_(u"Revoked on"), blank=True, null=True)
     status = models.CharField(_(u"Status"), choices=STATUS_CHOICES,
                               max_length=1, default=STATUS_GENERATED)
 
     def __unicode__(self):
-        return u"%s >> %s" % (self.identifier, 
-                              ", ".join(site.name for site in self.site.all()))
+        return u"%s >> %s" % (self.identifier, site.name)
 
 
 class IdentifierRequest(models.Model):
@@ -112,13 +90,13 @@ class IdentifierRequest(models.Model):
                                       db_index=True)
     updated_on = models.DateTimeField(auto_now=True)
     site = models.ForeignKey(Site)
-    total_requsted = models.IntegerField(max_length=11,
-                                         verbose_name=_(u"Total Requested"))
+    total_requested = models.IntegerField(max_length=11,
+                                          verbose_name=_(u"Total Requested"))
     description = models.TextField(blank=True, null=True,
                                    verbose_name=_(u"description"))
 
     def __unicode__(self):
-        return u'%s >> %s' % (self.site.name, self.total_requsted)
+        return u'%s >> %s' % (self.site.name, self.total_requested)
 
     def used(self):
         return self.identifierprinted_set.filter(identifier__status=Identifier.STATUS_ISSUED)
@@ -155,16 +133,18 @@ class SitesUser(models.Model):
 
 def print_identifiers(sender, **kwargs):
     obj = kwargs['instance']
-    requested_id = obj.total_requsted
+    requested_id = obj.total_requested
     site = Site.objects.get(site__pk=obj.site)
-    z = HealthIDs.objects.filter(site=site)
-    _all = Identifier.unusedIdentifiers().filter(~Q(identifier__in=z))[:requested_id]
+    z = IssuedIdentifier.objects.filter(site=site)
+    _all = Identifier.filter(~Q(identifier__in=z))[:requested_id]
     for j in _all:
-        j.status = Identifier.STATUS_PRINTED
-        j.save()
         q = IdentifierPrinted()
         q.batch = obj
         q.identifier = j
         q.save()
+        p = IssuedIdentifier()
+        p.status = IssuedIdentifier.STATUS_PRINTED
+        p.identifier = j
+        p.save()
 
 post_save.connect(print_identifiers, sender=IdentifierRequest)

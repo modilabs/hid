@@ -7,3 +7,6 @@ pillow
 elaphe
 lxml
 beautifulsoup4
+celery
+django-celery
+

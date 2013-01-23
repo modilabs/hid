@@ -17,12 +17,12 @@ from hid.barcode import b64_qrcode
 
 from hid.models import Identifier, Site
 from hid.forms import *
-from hid.utils import *
 
 from logger_ng.models import LoggedMessage
 from hid.decorators import site_required
 from django.contrib.auth.decorators import login_required
 
+from hid.utils import *
 
 @login_required
 @site_required
@@ -31,15 +31,12 @@ def index(request):
     context = RequestContext(request)
 
     total = Identifier.objects.all().count()
-    issued = Identifier.issuedIdentifiers().count()
-    unused = Identifier.unusedIdentifiers().count()
-    printed = total - issued - unused
 
     context.update({'total': total,
                     'ishome': True,
-                    'issued': issued,
-                    'printed': printed,
-                    'unused': unused})
+                    'issued': '',
+                    'printed': '',
+                    'unused': ''})
 
     context.home_reports = ""
     context.title = _(u"Identifier Dashboard")
@@ -63,7 +60,7 @@ def request_identifier(request):
     if request.POST:
         form = IdentifierForm(request.POST)
         if form.is_valid():
-            requested_id = form.cleaned_data['total_requsted']
+            requested_id = form.cleaned_data['total_requested']
             unused = Identifier.unusedIdentifiers().count()
             if requested_id > unused:
                 context.error = _(u"Only %d Identifiers are available. \
@@ -71,7 +68,7 @@ def request_identifier(request):
             site = Site.objects.get(slug=site)
             c = IdentifierRequest()
             c.site = site
-            c.total_requsted = requested_id
+            c.total_requested = requested_id
             c.save()
 
             if c:
@@ -164,9 +161,4 @@ def getid(request, mvp_site):
     s.site = site
     s.save()
     #inject ID
-    if sanitise_case(site, data):
-        print "Hurray"
-    else:
-        print "checking"
-    print data
-    ''' Check if HID field is not blank '''
+    sanitise_case(site, data)

@@ -9,10 +9,13 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+import djcelery
+djcelery.setup_loader()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'hhid.db',                      # Or path to database file if using sqlite3.
+        'NAME': 'identifier.db',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -118,6 +121,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'south',
+    'djcelery',
     'hid',
     'logger_ng',
 )
@@ -169,6 +173,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 #COMMCARE DOMAIN URL
 COMMCARE_URL = "https://www.commcarehq.org/a/%s/receiver/"
 SUBMIT_TO_COMMCARE = True
+
+
+# celery
+BROKER_BACKEND = "rabbitmq"
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_RESULT_BACKEND = "amqp" # telling Celery to report the results back to RabbitMQ
+
 
 try:
     from local_settings import *

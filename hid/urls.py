@@ -6,6 +6,8 @@ from django.contrib import admin
 import hid.views as views
 import logger_ng.views as view
 
+from hid import uploadidentifier
+
 
 admin.autodiscover()
 
@@ -24,6 +26,9 @@ urlpatterns = patterns('',
         name='request-id'),
     url(r'^report/?$', 'hid.views.batch_list',
         name='report'),
+    url(r'^upload',
+        uploadidentifier.upload_file, name='upload-ids'),
+        
     url(r'^getid/(?P<mvp_site>[^/]+)$', 'hid.views.getid'),
     url(r'^print_batch/(?P<batchid>[^/]+)$',
         'hid.views.print_identifier', name='printbatch'),
