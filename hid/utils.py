@@ -2,14 +2,16 @@
 # maintainer: katembu
 
 import os
+
 from urlparse import urlparse
 import httplib
 import math
 import random
 
-from bs4 import BeautifulSoup as soup
-
+from bs4 import BeautifulSoup as Soup
 from datetime import datetime
+
+from hid.models import *
 
 VALID_CHARS = "0123456789ACDEFGHJKLMNPRTUVWXY"
 LEN = 4
@@ -116,7 +118,7 @@ def generateIdentifier():
     identifier = ''.join([random.choice(char) for i in range(0, slen - 1)])
     return generate(identifier)
 
-  
+ 
 def transmit_form(form):
     ''' Submit data to commcare server '''
     xml_form = form.data
@@ -141,23 +143,41 @@ def transmit_form(form):
 def valid_hid(hid):
     ''' Check if HID is Valid '''
     try:
-        m = Identifier.objects.get(identifier=hid)
+        Identifier.objects.get(identifier=hid)
+        return True
     except Identifier.DoesNotExist:
-        m = False
-    return m
+        return False
 
 
-def old_valid_hid(hid, site):
+def oldvalid_hid(hid, site):
     ''' Check if HID exists in previous CHILDCOUNT IDs '''
     try:
-        m = HealthIDs.objects.get(identifier=hid, site=site)
-    except HealthIDs.DoesNotExist:
-        m = False
-    return m
+        IssuedIdentifier.objects.get(identifier=hid, site__slug=site)
+        return True
+    except IssuedIdentifier.DoesNotExist:
+        return False
+
+
+def checkhid(hid, site):
+    if oldvalid_hid(hid, site):
+        #Check if HID exist in childcount hid pool.
+        response = {'status': True, 'hid': hid}
+    elif valid_hid(hid):
+        new = valid_hid(hid)
+        if new.status == Identifier.STATUS_GENERATED:
+            new.status = STATUS_ISSUED
+            new.save()
+        response = {'status': True, 'hid': hid}
+        #check if HID exist in new generated IDs
+    else:
+        #z = Identifier.objects.filter(status=Identifier.STATUS_GENERATED)[0]
+        response = {'status': True, 'hid': hid}
+
+    return response
 
 
 def sanitise_case(site, data):
-    soup = soup(data, 'xml')
+    soup = Soup(data)
     #check if case type exist
     try:
         m = soup.find('case_type')
@@ -176,37 +196,37 @@ def sanitise_case(site, data):
             try:
                 m = soup.find('household_head_health_id')
                 old_hid = m.text.upper()
+                tag = 'household_head_health_id'
             except:
                 return False
-
-            return checkhid(old_hid, site)
         else:
             try:
                 m = soup.find('health_id')
                 old_hid = m.text.upper()
+                tag = 'health_id'
             except:
                 return False
-            return checkhid(old_hid, site)
+
+        z = checkhid(old_hid, site)
+        print z
+        
+        print "===== "
+        print tag
+        print old_hid
+        print site
+        print "===== "
+
+        z = checkhid(old_hid, site)
+        print z
+        '''
+        if z['status'] == True:
+            print z['hid']
+        else:
+            print ">>>> Error >>"
+        '''   
     else:
         '''
         update form to indicate that it was not processed because it did
         not specify have case_type
         '''
         return False
-
-
-def checkhid(hid, site):
-
-    if old_valid_hid(hid, site):
-        #Check if HID exist in childcount hid pool.
-        print "Child count"
-    elif valid_hid(hid):
-        print "identidfier"
-        new = valid_hid(hid)
-        if new.status == Identifier.STATUS_GENERATED:
-            new.status = STATUS_ISSUED
-            new.save()
-        #check if HID exist in new generated IDs
-    else:
-        print "else"
-        #get a new HID from POOL and assign
