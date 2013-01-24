@@ -13,7 +13,7 @@ from django.db import IntegrityError
 
 from hid.decorators import site_required
 from hid.models import Site, Identifier, IssuedIdentifier
-
+from hid.utils import validateCheckDigit
 
 class UploadHealthIDFileForm(forms.Form):
     title = forms.CharField(max_length=50)
@@ -59,19 +59,24 @@ def load_healthids(filename, site):
         with open(filename) as f:
             for line in f:
                 line = line.strip()
-                try:
-                    hid = Identifier.objects.get_or_create(identifier=line)
-                    c += 1
-                except IntegrityError:
-                    print line
-                    pass
-
-                if hid:
-                    hhid = Identifier.objects.get(identifier=line)
+                if validateCheckDigit(line):
                     try:
-                        IssuedIdentifier.objects.create(identifier=hhid,
-                                                        site=site)
+                        hid = Identifier.objects.get_or_create(identifier=line)
+                        c += 1
                     except IntegrityError:
-                        print "error"
                         pass
+
+                    if hid:
+                        hhid = Identifier.objects.get(identifier=line)
+                        try:
+                            IssuedIdentifier.objects.create(identifier=hhid,
+                                                            site=site)
+                        except IntegrityError:
+                            pass
+
+                else:
+                    print line
+                    print "====== INVALID ===="
+
+
     return c
