@@ -91,7 +91,8 @@ def validateCheckDigit(identifier):
         # loop through digits from right to left
         for n, char in enumerate(reversed(identifier)):
             if not valid_chars.count(char):
-                raise Exception('InvalidIDException')
+                #raise Exception('InvalidIDException')
+                return False
 
             # Point
             code_point = valid_chars.index(char)
