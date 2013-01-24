@@ -1,9 +1,10 @@
 Django==1.4.1
+MySQL-python
 requests
 south
 django-extensions
 django-reversion
-pillow
+Pillow
 elaphe
 lxml
 beautifulsoup4

@@ -1,3 +1,3 @@
 identifier
 =============
-sudo apt-get install ghostscript libxml2-dev libxslt-dev
+sudo apt-get install python-dev ghostscript libxml2-dev libxslt-dev

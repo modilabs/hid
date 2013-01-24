@@ -53,6 +53,7 @@ class IssuedIdentifier(models.Model):
         app_label = 'hid'
         verbose_name = _(u"CC+ HID Issued")
         verbose_name_plural = _(u"CC+ HID Issued to sites")
+        unique_together = ('identifier', 'site')
 
     STATUS_GENERATED = 'G'
     STATUS_PRINTED = 'P'
@@ -65,7 +66,7 @@ class IssuedIdentifier(models.Model):
         (STATUS_ISSUED, _(u"Issued")),
         (STATUS_REVOKED, _(u"Revoked")))
 
-    identifier = models.ForeignKey(Identifier, max_length=10)
+    identifier = models.ForeignKey(Identifier, max_length=10, unique=False)
     site = models.ForeignKey(Site, related_name="assigned_sites",
                              verbose_name=_(u"Assigned Site"))
     printed_on = models.DateTimeField(_(u"Printed on"), blank=True, null=True)
@@ -75,7 +76,7 @@ class IssuedIdentifier(models.Model):
                               max_length=1, default=STATUS_GENERATED)
 
     def __unicode__(self):
-        return u"%s >> %s" % (self.identifier, site.name)
+        return u"%s >> %s" % (self.identifier, self.site.name)
 
 
 class IdentifierRequest(models.Model):
@@ -97,9 +98,6 @@ class IdentifierRequest(models.Model):
 
     def __unicode__(self):
         return u'%s >> %s' % (self.site.name, self.total_requested)
-
-    def used(self):
-        return self.identifierprinted_set.filter(identifier__status=Identifier.STATUS_ISSUED)
 
 reversion.register(IdentifierRequest)
 
@@ -128,15 +126,15 @@ class SitesUser(models.Model):
     user = models.ForeignKey(User, verbose_name=_(u"User"))
 
     def __unicode__(self):
-        return self.user.username
+        return u'%s >> %s' % (self.user.username, self.site.name)
 
 
 def print_identifiers(sender, **kwargs):
     obj = kwargs['instance']
     requested_id = obj.total_requested
-    site = Site.objects.get(site__pk=obj.site)
+    site = Site.objects.get(slug=obj.site)
     z = IssuedIdentifier.objects.filter(site=site)
-    _all = Identifier.filter(~Q(identifier__in=z))[:requested_id]
+    _all = Identifier.objects.filter(~Q(identifier__in=z))[:requested_id]
     for j in _all:
         q = IdentifierPrinted()
         q.batch = obj
@@ -145,6 +143,7 @@ def print_identifiers(sender, **kwargs):
         p = IssuedIdentifier()
         p.status = IssuedIdentifier.STATUS_PRINTED
         p.identifier = j
+        p.site = site
         p.save()
 
 post_save.connect(print_identifiers, sender=IdentifierRequest)

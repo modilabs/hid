@@ -15,7 +15,7 @@ from django.template import RequestContext
 from django.utils.translation import ugettext as _
 from hid.barcode import b64_qrcode
 
-from hid.models import Identifier, Site
+from hid.models import Identifier, Site, IssuedIdentifier
 from hid.forms import *
 
 from logger_ng.models import LoggedMessage
@@ -29,8 +29,10 @@ from hid.utils import *
 def index(request):
     '''Landing page '''
     context = RequestContext(request)
-
-    total = Identifier.objects.all().count()
+    
+    site=request.session.get('assigned_site')
+    site = Site.objects.get(slug=site)
+    total = IssuedIdentifier.objects.filter(site=site).count()
 
     context.update({'total': total,
                     'ishome': True,
@@ -56,16 +58,17 @@ def login_greeter(request):
 def request_identifier(request):
     context = RequestContext(request)
     site=request.session.get('assigned_site')
+    site = Site.objects.get(slug=site)
     form = IdentifierForm()
     if request.POST:
         form = IdentifierForm(request.POST)
         if form.is_valid():
             requested_id = form.cleaned_data['total_requested']
-            unused = Identifier.unusedIdentifiers().count()
+            z = IssuedIdentifier.objects.filter(site=site)
+            unused = Identifier.objects.filter(~Q(identifier__in=z)).count()
             if requested_id > unused:
                 context.error = _(u"Only %d Identifiers are available. \
                                     Please request less Identifiers") % unused
-            site = Site.objects.get(slug=site)
             c = IdentifierRequest()
             c.site = site
             c.total_requested = requested_id
