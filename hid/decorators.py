@@ -21,7 +21,7 @@ def site_required(view):
             try:
                 site = SitesUser.objects.filter(user=user)
             except:
-                return HttpResponse("You're assigned any site")
+                return HttpResponse("You're not assigned any site")
 
             else:
                 if site.count() > 1:
