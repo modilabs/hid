@@ -9,15 +9,16 @@ from django.shortcuts import render, get_object_or_404
 from django.template import Template, Context, loader
 from django.contrib.auth.decorators import login_required, permission_required
 from django import forms
-from django.db import IntegrityError
 
 from hid.decorators import site_required
 from hid.models import Site, Identifier, IssuedIdentifier
-from hid.utils import validateCheckDigit
+from hid.tasks import upload_identifier
+
 
 class UploadHealthIDFileForm(forms.Form):
     title = forms.CharField(max_length=50)
     file = forms.FileField()
+
 
 @site_required
 @login_required
@@ -32,7 +33,7 @@ def upload_file(request):
             fn = title.strip().replace(' ', '_') + '.txt'
             fn = handle_uploaded_file(request.FILES['file'], fn)
             message = u"Succesfully uploaded health id file."
-            c = load_healthids(fn, site)
+            c = upload_identifier(fn, site)
             message += " %(count)s health ids added." % {'count': c}
             ctx = {'message': message}
         else:
@@ -50,33 +51,3 @@ def handle_uploaded_file(f, filename):
         destination.write(chunk)
     destination.close()
     return fn
-
-
-def load_healthids(filename, site):
-    c = 0
-    hid = False
-    if filename:
-        with open(filename) as f:
-            for line in f:
-                line = line.strip()
-                if validateCheckDigit(line):
-                    try:
-                        hid = Identifier.objects.get_or_create(identifier=line)
-                        c += 1
-                    except IntegrityError:
-                        pass
-
-                    if hid:
-                        hhid = Identifier.objects.get(identifier=line)
-                        try:
-                            IssuedIdentifier.objects.create(identifier=hhid,
-                                                            site=site)
-                        except IntegrityError:
-                            pass
-
-                else:
-                    print line
-                    print "====== INVALID ===="
-
-
-    return c

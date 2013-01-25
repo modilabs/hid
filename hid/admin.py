@@ -7,8 +7,19 @@ from django.contrib.auth.models import User
 from hid.models import Site, Identifier, IdentifierRequest, SitesUser, \
     IssuedIdentifier
 
+
+def site(obj):
+    return obj.site.name.upper()
+
+
+class IssuedIdentifierAdmin(admin.ModelAdmin):
+    list_display = ('identifier', 'status', site)
+    list_filter = ['site']
+    search_fields = ['identifier']
+
+
+admin.site.register(IssuedIdentifier, IssuedIdentifierAdmin)
 admin.site.register(Site)
-admin.site.register(IssuedIdentifier)
 admin.site.register(Identifier)
 admin.site.register(IdentifierRequest)
 admin.site.register(SitesUser)

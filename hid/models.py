@@ -76,7 +76,7 @@ class IssuedIdentifier(models.Model):
                               max_length=1, default=STATUS_GENERATED)
 
     def __unicode__(self):
-        return u"%s >> %s" % (self.identifier, self.site.name)
+        return u"%s " % self.identifier
 
 
 class IdentifierRequest(models.Model):
