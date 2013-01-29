@@ -95,6 +95,8 @@ class IdentifierRequest(models.Model):
                                           verbose_name=_(u"Total Requested"))
     description = models.TextField(blank=True, null=True,
                                    verbose_name=_(u"description"))
+    task_progress = models.PositiveSmallIntegerField(_("Progress"), blank=False,
+                                null=False, unique=False, default=0)
 
     def __unicode__(self):
         return u'%s >> %s' % (self.site.name, self.total_requested)
@@ -127,24 +129,3 @@ class SitesUser(models.Model):
 
     def __unicode__(self):
         return u'%s >> %s' % (self.user.username, self.site.name)
-
-
-def print_identifiers(sender, **kwargs):
-    obj = kwargs['instance']
-    requested_id = obj.total_requested
-    site = Site.objects.get(slug=obj.site)
-    z = IssuedIdentifier.objects.filter(site=site)
-    _all = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in z]))[:requested_id]
-    for j in _all:
-        q = IdentifierPrinted()
-        q.batch = obj
-        q.identifier = j
-        q.save()
-        p = IssuedIdentifier()
-        
-        p.status = IssuedIdentifier.STATUS_PRINTED
-        p.identifier = j
-        p.site = site
-        p.save()
-
-post_save.connect(print_identifiers, sender=IdentifierRequest)
