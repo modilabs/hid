@@ -13,6 +13,8 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
+from django.db.models import Q
+
 from hid.barcode import b64_qrcode
 
 from hid.models import Identifier, Site, IssuedIdentifier
@@ -23,6 +25,8 @@ from hid.decorators import site_required
 from django.contrib.auth.decorators import login_required
 
 from hid.utils import *
+from hid.tasks import printhid
+
 
 @login_required
 @site_required
@@ -65,7 +69,7 @@ def request_identifier(request):
         if form.is_valid():
             requested_id = form.cleaned_data['total_requested']
             z = IssuedIdentifier.objects.filter(site=site)
-            unused = Identifier.objects.filter(~Q(identifier__in=z)).count()
+            unused = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in z])).count()
             if requested_id > unused:
                 context.error = _(u"Only %d Identifiers are available. \
                                     Please request less Identifiers") % unused
@@ -73,6 +77,7 @@ def request_identifier(request):
             c.site = site
             c.total_requested = requested_id
             c.save()
+            printhid.apply_async((), {'obj': c})
 
             if c:
                 return HttpResponseRedirect("/print_batch/%s" % c.pk)

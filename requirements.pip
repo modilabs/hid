@@ -1,6 +1,7 @@
 Django==1.4.1
 MySQL-python
 requests
+simplejson
 south
 django-extensions
 django-reversion
