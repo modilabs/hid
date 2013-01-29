@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block javascripts %}
+<script type="text/javascript" language="javascript" src="{{ STATIC_URL }}js/ondemand.js"></script>
+{% endblock %}
 {% block content %}
 
         {% if batch_list %}
@@ -10,21 +13,13 @@
             <th>Site</th>
             <th>Date </th>
             <th>Requested </th>
-            <th>Used </th>
             <th>#</th>
         </tr>
         </thead>
         <tbody>
         {% for item in batch_list %}
-        <tr>
-            <td>{{ item.site.name }}</td>
-            <td>{{ item.generated_on }}</td>
-            <td>{{ item.total_requested }}</td>
-            <td></td>
-            <td>
-                <a href="{% url printbatch item.pk %}" class="btn btn-info btn-mini"><i class="icon-print"></i>&nbsp;{% trans "Print View" %}</a>
-                <a href="{% url printbatch item.pk %}" class="btn "><i class="icon-list"></i>&nbsp;{% trans "Xls" %}</a>
-            </td>
+        <tr  id="row_{{ item.pk }}">
+            {% include "status_row.html" %}
         </tr>
         {% endfor %}
         </tbody>

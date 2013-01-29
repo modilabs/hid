@@ -32,6 +32,8 @@ urlpatterns = patterns('',
     url(r'^getid/(?P<mvp_site>[^/]+)$', 'hid.views.getid'),
     url(r'^print_batch/(?P<batchid>[^/]+)$',
         'hid.views.print_identifier', name='printbatch'),
+        
+    (r'^hid/ajax_progress/$', views.ajax_progress),
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),

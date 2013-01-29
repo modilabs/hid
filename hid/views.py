@@ -2,6 +2,7 @@
 # maintainer: katembu
 import requests
 import json
+import simplejson
 
 from requests.exceptions import ConnectionError
 from django.conf import settings
@@ -14,6 +15,9 @@ from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 from django.db.models import Q
+
+from django.template import Context
+from django.template import loader
 
 from hid.barcode import b64_qrcode
 
@@ -80,7 +84,7 @@ def request_identifier(request):
             printhid.apply_async((), {'obj': c})
 
             if c:
-                return HttpResponseRedirect("/print_batch/%s" % c.pk)
+                return HttpResponseRedirect("/report")
 
     context.form = form
     return render(request, "request-form.html", context_instance=context)
@@ -170,3 +174,20 @@ def getid(request, mvp_site):
     s.save()
     #inject ID
     sanitise_case(site, data)
+
+
+@login_required
+def ajax_progress(request):
+    site = request.session.get('assigned_site')
+    reps = IdentifierRequest.objects.filter(site__pk=site)
+    rows = {}
+    progresses = {}
+    row_template = loader.get_template("status_row.html")
+    for r in reps:
+        c = Context({'rep': r})
+        rows[r.pk] = row_template.render(c)
+        if r.task_progress:
+            progresses[r.pk] = r.task_progress
+
+    return HttpResponse(simplejson.dumps([rows,progresses]), \
+                                mimetype="application/json")    
