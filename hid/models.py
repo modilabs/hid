@@ -134,13 +134,14 @@ def print_identifiers(sender, **kwargs):
     requested_id = obj.total_requested
     site = Site.objects.get(slug=obj.site)
     z = IssuedIdentifier.objects.filter(site=site)
-    _all = Identifier.objects.filter(~Q(identifier__in=z))[:requested_id]
+    _all = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in z]))[:requested_id]
     for j in _all:
         q = IdentifierPrinted()
         q.batch = obj
         q.identifier = j
         q.save()
         p = IssuedIdentifier()
+        
         p.status = IssuedIdentifier.STATUS_PRINTED
         p.identifier = j
         p.site = site
