@@ -26,7 +26,3 @@ class SiteTest(TestCase):
         self.user = self._create_user(username, password)
         self.client = self._login(username, password)
         self.anon = Client()
-
-    def test_index_view(self):
-        response = self.client.get(reverse(views.index))
-        self.assertEqual(response.status_code, 200)

@@ -20,8 +20,8 @@ class UploadHealthIDFileForm(forms.Form):
     file = forms.FileField()
 
 
-@site_required
 @login_required
+@site_required
 def upload_file(request):
     site = request.session.get('assigned_site')
     site = Site.objects.get(slug=site)
