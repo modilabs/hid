@@ -1,8 +1,11 @@
 # encoding=utf-8
 # maintainer: katembu
 
+import sys, os
+
 from django.db import IntegrityError
 from django.db.models import Q
+from django.conf import settings
 
 from hid.models import Identifier, IssuedIdentifier, Site, IdentifierPrinted
 from hid.utils import generateIdentifier, validateCheckDigit
@@ -63,8 +66,11 @@ def printhid(obj):
     site = Site.objects.get(slug=obj.site)
     z = IssuedIdentifier.objects.filter(site=site)
     _all = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in z]))[:requested_id]
+    
+    loc = str(settings.DOWNLOADS_URL+str(obj.pk)+'_identifier.txt')
+    file_name = os.path.abspath(loc)
+    f = open(file_name, 'w+')
     for j in _all:
-        print obj
         q = IdentifierPrinted()
         q.batch = obj
         q.identifier = j
@@ -76,11 +82,17 @@ def printhid(obj):
         p.site = site
         p.save()
         
+        #write identifier
+        k = str(j.identifier)+' \n'
+        f.write(k)
+
         #Add total
         current += 1
         obj.task_progress = int(100.0*current/requested_id)
         obj.save()
-          
+    f.close()
+
+
 '''
 @periodic_task(run_every=crontab())
 def add():

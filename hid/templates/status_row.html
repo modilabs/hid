@@ -4,7 +4,7 @@
             <td>
             {% if item.task_progress == 100 %}
                 <a href="{% url printbatch item.pk %}" class="btn btn-info btn-mini"><i class="icon-print"></i>&nbsp;</a>
-                <a href="{% url printbatch item.pk %}" class="btn "><i class="icon-list"></i>&nbsp;</a>
+                <a href="download/{{item.pk}}_identifier.txt" title="{{item.site.name}} class="btn "><i class="icon-list"></i>&nbsp;</a>
              {% elif item.task_progress == 0 %}
                     {{ item.task_progress }}
               {% else %}

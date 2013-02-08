@@ -1,6 +1,9 @@
 # encoding=utf-8
 # maintainer: katembu
 
+import os
+from django.conf import settings
+
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 import hid.views as views
@@ -34,6 +37,10 @@ urlpatterns = patterns('',
         'hid.views.print_identifier', name='printbatch'),
         
     (r'^hid/ajax_progress/$', views.ajax_progress),
+    
+    url(r'^download/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': '%s' % os.path.abspath(settings.DOWNLOADS_URL),
+                'show_indexes': False}),
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
