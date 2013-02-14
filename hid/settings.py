@@ -69,6 +69,7 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
+DOWNLOADS_URL = 'download/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -164,7 +165,6 @@ LOGGING = {
             'propagate': True,
         },
     }
-}
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -179,12 +179,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 COMMCARE_URL = "https://www.commcarehq.org/a/%s/receiver/"
 SUBMIT_TO_COMMCARE = True
 
-
 # celery
 BROKER_BACKEND = "rabbitmq"
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 CELERY_RESULT_BACKEND = "amqp" # telling Celery to report the results back to RabbitMQ
-
 
 try:
     from local_settings import *
