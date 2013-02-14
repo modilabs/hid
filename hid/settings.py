@@ -164,7 +164,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-    }
+    },
 }
 
 TEMPLATE_CONTEXT_PROCESSORS = (
