@@ -10,14 +10,18 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required, permission_required
 from logger_ng.models import LoggedMessage
 
+from hid.decorators import site_required
+
 
 @login_required
+@site_required
 @permission_required('logger_ng.can_view')
 def index(request):
     '''
     Index view
     '''
     MESSAGES_PER_PAGE = 30
+    site = request.session.get('assigned_site')
 
     # If it is a POST then they are responding to a message.
     # Don't allow sending if the user doesn't have the can_respond permission
@@ -35,10 +39,10 @@ def index(request):
     
     # Don't exclude outgoing messages that are a response to another,
     # because they will be shown threaded beneath the original message
-    msgs = LoggedMessage.objects.exclude(
-                                    direction=LoggedMessage.DIRECTION_OUTGOING,
+    msm = LoggedMessage.objects.filter(site__pk=site)
+    msgs = msm.exclude(direction=LoggedMessage.DIRECTION_OUTGOING,
                                     response_to__isnull=False)
-                                    
+
     # filter from form        
     if request.method == 'GET':
         search = request.GET.get('logger_ng_search_box', '')
