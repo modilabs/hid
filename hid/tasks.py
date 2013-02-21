@@ -112,9 +112,9 @@ def injectid(obj):
         case_type = p['form_type']
         c = soup.find(case_)
         c.contents[0].replaceWith(hid.identifier)
-
+        soup = soups.replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", "")
         y = "<%s> %s </%s>" % (case_type, soup, case_type)
-        y = y.replace(str("<\?xml version=\"1.0\" encoding=\"utf-8\"\?>"), "")
+       
         COMMCARE_URL = COMMCARE_LINK % z.site
         print COMMCARE_URL
         print y
