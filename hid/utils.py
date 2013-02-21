@@ -148,21 +148,20 @@ def valid_hid(hid):
     ''' Check if HID is Valid '''
     try:
         Identifier.objects.get(identifier=hid)
-        return True
     except Identifier.DoesNotExist:
         return False
-
+    return True
 
 def oldvalid_hid(hid, site):
     ''' Check if HID exists in previous CHILDCOUNT IDs '''
     try:
         p = IssuedIdentifier.objects.get(identifier__identifier=hid, site__slug=site)
-        p = IssuedIdentifier.STATUS_ISSUED
-        p.save()
-        return True
     except IssuedIdentifier.DoesNotExist:
         return False
 
+    p = IssuedIdentifier.STATUS_ISSUED
+    p.save()
+    return True
 
 def checkhid(hid, site):
     if oldvalid_hid(hid, site):
