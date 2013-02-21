@@ -109,31 +109,32 @@ def injectid(obj):
         k = IssuedIdentifier.objects.filter(site=z.site)
         _all = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in k]))[:1]
         hid = _all[0]
-        if not p['household']:
-            case_type = p['form_type']
-            c = soup.find('health_id')
-            c.contents[0].replaceWith(hid.identifier)
-            print c
-            y = "<%s> %s </%s>" % (case_type, soup, case_type)
-            COMMCARE_URL = COMMCARE_LINK % z.site
-            print COMMCARE_URL
-            print y
-            form = {'data': y,
+        print p
+        case_ = "household_head_health_id" if p['household'] else "health_id"
+        case_type = p['form_type']
+        c = soup.find(case_)
+        c.contents[0].replaceWith(hid.identifier)
+
+        y = "<%s> %s </%s>" % (case_type, soup, case_type)
+        COMMCARE_URL = COMMCARE_LINK % z.site
+        print COMMCARE_URL
+        print y
+        form = {'data': y,
                         'SUBMIT_TO_COMMCARE': SUBMIT_TO_COMMCARE,
                         'COMMCARE_URL': COMMCARE_URL}
-            if transmit_form(form):
-                s = LoggedMessage()
-                s.text = y
-                s.direction = s.DIRECTION_OUTGOING
-                s.response_to = z
-                s.site = z.site
-                s.save()
+        if transmit_form(form):
+            s = LoggedMessage()
+            s.text = y
+            s.direction = s.DIRECTION_OUTGOING
+            s.response_to = z
+            s.site = z.site
+            s.save()
 
-                z.status = s.STATUS_SUCCESS
-                z.save()
+            z.status = s.STATUS_SUCCESS
+            z.save()
 
-                p = IssuedIdentifier()
-                p.status = IssuedIdentifier.STATUS_ISSUED
-                p.identifier = hid
-                p.site = z.site
-                p.save()
+            p = IssuedIdentifier()
+            p.status = IssuedIdentifier.STATUS_ISSUED
+            p.identifier = hid
+            p.site = z.site
+            p.save()
