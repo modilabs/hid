@@ -172,8 +172,6 @@ def getid(request, mvp_site):
     s.direction = s.DIRECTION_INCOMING
     s.site = site
     s.save()
-    #inject ID
-    sanitise_case(site, data)
 
 
 @login_required

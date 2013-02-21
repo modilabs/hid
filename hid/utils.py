@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup as Soup
 from datetime import datetime
 
 from hid.models import *
+from logger_ng.models import LoggedMessage
 
 VALID_CHARS = "0123456789ACDEFGHJKLMNPRTUVWXY"
 LEN = 4
@@ -122,10 +123,10 @@ def generateIdentifier():
  
 def transmit_form(form):
     ''' Submit data to commcare server '''
-    xml_form = form.data
+    xml_form = form['data']
     headers = {"Content-type": "text/xml", "Accept": "text/plain"}
-    url = form.COMMCARE_URL
-    SUBMIT_CASEXML = form.SUBMIT_TO_COMMCARE
+    url = form['COMMCARE_URL']
+    SUBMIT_CASEXML = form['SUBMIT_TO_COMMCARE']
 
     if SUBMIT_CASEXML:
         print url
@@ -136,9 +137,11 @@ def transmit_form(form):
         resp = conn.getresponse()
         responsetext = resp.read()
         if resp.status == 201:
-            print "Bad HTTP Response: %s " % responsetext
+            print "Thanks for submitting  %s " % responsetext
+            return True
         else:
-            print "Thanks for submitting %s Bad response text" % responsetext
+            print "Bad response text: %s " % responsetext
+            return False
 
 
 def valid_hid(hid):
@@ -153,7 +156,9 @@ def valid_hid(hid):
 def oldvalid_hid(hid, site):
     ''' Check if HID exists in previous CHILDCOUNT IDs '''
     try:
-        IssuedIdentifier.objects.get(identifier=hid, site__slug=site)
+        p = IssuedIdentifier.objects.get(identifier__identifier=hid, site__slug=site)
+        p = IssuedIdentifier.STATUS_ISSUED
+        p.save()
         return True
     except IssuedIdentifier.DoesNotExist:
         return False
@@ -162,19 +167,16 @@ def oldvalid_hid(hid, site):
 def checkhid(hid, site):
     if oldvalid_hid(hid, site):
         #Check if HID exist in childcount hid pool.
-        response = {'status': True, 'hid': hid}
+        return True
     elif valid_hid(hid):
-        new = valid_hid(hid)
+        new = Identifier.objects.get(identifier=hid)
         if new.status == Identifier.STATUS_GENERATED:
             new.status = STATUS_ISSUED
             new.save()
-        response = {'status': True, 'hid': hid}
+        return True
         #check if HID exist in new generated IDs
     else:
-        #z = Identifier.objects.filter(status=Identifier.STATUS_GENERATED)[0]
-        response = {'status': True, 'hid': hid}
-
-    return response
+        return False
 
 
 def sanitise_case(site, data):
@@ -198,6 +200,7 @@ def sanitise_case(site, data):
                 m = soup.find('household_head_health_id')
                 old_hid = m.text.upper()
                 tag = 'household_head_health_id'
+                household = True
             except:
                 return False
         else:
@@ -205,29 +208,15 @@ def sanitise_case(site, data):
                 m = soup.find('health_id')
                 old_hid = m.text.upper()
                 tag = 'health_id'
+                household = False
             except:
                 return False
 
         z = checkhid(old_hid, site)
-        print z
-        
-        print "===== "
-        print tag
-        print old_hid
-        print site
-        print "===== "
-
-        z = checkhid(old_hid, site)
-        print z
-        '''
-        if z['status'] == True:
-            print z['hid']
-        else:
-            print ">>>> Error >>"
-        '''   
+        return {'status': False, 'form_type': s , 'household': household }
     else:
         '''
         update form to indicate that it was not processed because it did
         not specify have case_type
         '''
-        return False
+        return {'status': True}

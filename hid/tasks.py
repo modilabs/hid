@@ -6,13 +6,18 @@ import sys, os
 from django.db import IntegrityError
 from django.db.models import Q
 from django.conf import settings
+from bs4 import BeautifulSoup as Soup
 
 from hid.models import Identifier, IssuedIdentifier, Site, IdentifierPrinted
 from hid.utils import generateIdentifier, validateCheckDigit
+from logger_ng.models import LoggedMessage
 
 from celery import task
 from celery.task.schedules import crontab
 from celery.task import periodic_task
+
+SUBMIT_TO_COMMCARE = True
+COMMCARE_URL = "https://www.commcarehq.org/a/%s/receiver/"
 
 
 @task()
@@ -93,19 +98,45 @@ def printhid(obj):
     f.close()
 
 
-'''
-@periodic_task(run_every=crontab())
-def add():
-    print "Hurray"
+@periodic_task(run_every=crontab(minute='*/2'))
+def injectidentifier():
+    cases = LoggedMessage.objects.filter(site__slug="test").exclude(
+                        direction=LoggedMessage.DIRECTION_OUTGOING,
+                        status=LoggedMessage.STATUS_SUCCESS
+                        response_to__isnull=False)
 
-for x in range(1000000):
-    ident = generateIdentifier()
-    print ident
-    print x
-    print "+++++++============================++++++++++++++"
-    try:
-        m = Identifier(identifier=ident)
-        m.save()
-    except:
-        pass
-'''
+    for z in cases:
+        p = sanitise_case(z.site, z.text)
+        if not p['status']:
+            soup = Soup(z.text, 'xml')
+            #GET HID
+            k = IssuedIdentifier.objects.filter(site=z.site)
+            _all = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in k]))[:1]
+            hid = _all[0]
+            if not p['household']:
+                case_type = p['form_type']
+                c = soup.find('health_id')
+                c.contents[0].replaceWith(hid.identifier)print c
+                y = "<%s> %s </%s>" % (case_type, soup, case_type)
+                COMMCARE_URL = COMMCARE_URL % z.site
+                print COMMCARE_URL
+                print y
+                form = {'data': y,
+                        'SUBMIT_TO_COMMCARE': SUBMIT_TO_COMMCARE,
+                        'COMMCARE_URL': COMMCARE_URL}
+                if transmit_form(form):
+                    s = LoggedMessage()
+                    s.text = y
+                    s.direction = s.DIRECTION_OUTGOING
+                    s.response_to = z
+                    s.site = z.site
+                    s.save()
+
+                    z.status = s.STATUS_SUCCESS
+                    z.save()
+
+                    p = IssuedIdentifier()
+                    p.status = IssuedIdentifier.STATUS_ISSUED
+                    p.identifier = hid
+                    p.site = z.site
+                    p.save()
