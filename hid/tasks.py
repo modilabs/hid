@@ -4,7 +4,6 @@
 import sys, os
 
 from django.db import IntegrityError
-from django.db.models import Q
 from django.conf import settings
 from bs4 import BeautifulSoup as Soup
 
@@ -70,8 +69,7 @@ def printhid(obj):
     requested_id = obj.total_requested
     site = Site.objects.get(slug=obj.site)
     z = IssuedIdentifier.objects.filter(site=site)
-    _all = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in z]))[:requested_id]
-    
+    _all = Identifier.objects.exclude(pk__in=z.values('identifier_id'))
     loc = str(settings.DOWNLOADS_URL+str(obj.pk)+'_identifier.txt')
     file_name = os.path.abspath(loc)
     f = open(file_name, 'w+')
@@ -107,7 +105,7 @@ def injectid(obj):
         soup = Soup(z.text, 'xml')
         #GET HID
         k = IssuedIdentifier.objects.filter(site=z.site)
-        _all = Identifier.objects.filter(~Q(identifier__in=[x.identifier for x in k]))[:1]
+        _all = Identifier.objects.exclude(pk__in=k.values('identifier_id'))
         hid = _all[0]
         print p
         case_ = "household_head_health_id" if p['household'] else "health_id"
@@ -138,3 +136,13 @@ def injectid(obj):
             p.identifier = hid
             p.site = z.site
             p.save()
+        else:
+            s = LoggedMessage()
+            s.text = y
+            s.direction = s.DIRECTION_OUTGOING
+            s.response_to = z
+            s.site = z.site
+            s.save()
+
+            z.status = s.STATUS_ERROR
+            z.save()
