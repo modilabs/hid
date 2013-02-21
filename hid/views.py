@@ -41,10 +41,11 @@ def index(request):
     site=request.session.get('assigned_site')
     site = Site.objects.get(slug=site)
     total = IssuedIdentifier.objects.filter(site=site).count()
-
+    issued = IssuedIdentifier.objects.filter(status=IssuedIdentifier.STATUS_ISSUED).count()
+    
     context.update({'total': total,
                     'ishome': True,
-                    'issued': '',
+                    'issued': issued,
                     'printed': '',
                     'unused': ''})
 
