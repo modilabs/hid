@@ -29,7 +29,7 @@ from hid.decorators import site_required
 from django.contrib.auth.decorators import login_required
 
 from hid.utils import *
-from hid.tasks import printhid
+from hid.tasks import printhid, injectid
 
 
 @login_required
@@ -172,6 +172,8 @@ def getid(request, mvp_site):
     s.direction = s.DIRECTION_INCOMING
     s.site = site
     s.save()
+    if site.slug == 'mvp-mwandama':
+        injectid.apply_async((), {'obj': s})
 
 
 @login_required
