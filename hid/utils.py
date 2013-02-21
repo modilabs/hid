@@ -159,7 +159,7 @@ def oldvalid_hid(hid, site):
     except IssuedIdentifier.DoesNotExist:
         return False
 
-    p = IssuedIdentifier.STATUS_ISSUED
+    p.status = IssuedIdentifier.STATUS_ISSUED
     p.save()
     return True
 
@@ -168,10 +168,14 @@ def checkhid(hid, site):
         #Check if HID exist in childcount hid pool.
         return True
     elif valid_hid(hid):
-        new = Identifier.objects.get(identifier=hid)
-        if new.status == Identifier.STATUS_GENERATED:
-            new.status = STATUS_ISSUED
-            new.save()
+        hid = Identifier.objects.get(identifier=hid)
+        site = Site.objects.get(slug=site)
+        new = IssuedIdentifier()
+        new.identifier=hid
+        new.status = IssuedIdentifier.STATUS_ISSUED
+        new.site = site
+        new.save()
+        
         return True
         #check if HID exist in new generated IDs
     else:
