@@ -175,7 +175,6 @@ def checkhid(hid, site):
         new.status = IssuedIdentifier.STATUS_ISSUED
         new.site = site
         new.save()
-        
         return True
         #check if HID exist in new generated IDs
     else:
