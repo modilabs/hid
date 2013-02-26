@@ -111,14 +111,10 @@ def injectid(obj):
         case_ = "household_head_health_id" if p['household'] else "health_id"
         case_type = p['form_type']
         c = soup.find('case_')
-        try:
-            c.contents[0].replaceWith(hid.identifier)
-            soup = str(soup)
-        except:
-            mm = "<%s>%s</%s>" % (case_ ,hid.identifier, case_)
-            c = str(c)
-            soup = str(soup)
-            soup = soup.replace(c,mm)
+        mm = "<%s>%s</%s>" % (case_ ,hid.identifier, case_)
+        c = str(c)
+        soup = str(soup)
+        soup = soup.replace(c,mm)
 
         soup = soup.replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", "")
         y = "<%s> %s </%s>" % (case_type, soup, case_type)
