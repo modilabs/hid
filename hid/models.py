@@ -129,3 +129,15 @@ class SitesUser(models.Model):
 
     def __unicode__(self):
         return u'%s >> %s' % (self.user.username, self.site.name)
+
+
+class Cases(models.Model):
+    class Meta:
+        app_label = "hid"
+        verbose_name = _(u"Case")
+        verbose_name_plural = _(u"Cases")
+        unique_together = ('site', 'case')
+
+    site = models.ForeignKey(Site, verbose_name=_(u"Assigned Site"))
+    case = models.CharField(max_length=200, verbose_name=_(u"Case ID"))
+    identifier = models.ForeignKey(Identifier, max_length=10, blank=True, null=True, unique=False)
