@@ -15,4 +15,5 @@ class LoggedMessageAdmin(admin.ModelAdmin):
     list_display = ('date', '__unicode__')
     list_filter = ['direction', 'date', 'site']
     date_hierarchy = 'date'
+    search_fields = ['text']
 admin.site.register(LoggedMessage, LoggedMessageAdmin)
