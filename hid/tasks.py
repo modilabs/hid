@@ -124,8 +124,10 @@ def injectid(obj):
         y = "<%s> %s </%s>" % (case_type, soup, case_type)
        
         COMMCARE_URL = COMMCARE_LINK % z.site
-        print COMMCARE_URL
+        print "HID: %s \n" % hid.identifier
+        print "COMMCARE_URL: %s \n" % COMMCARE_URL
         print y
+        print "================================================================"
         form = {'data': y,
                         'SUBMIT_TO_COMMCARE': SUBMIT_TO_COMMCARE,
                         'COMMCARE_URL': COMMCARE_URL}
