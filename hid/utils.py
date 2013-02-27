@@ -180,6 +180,14 @@ def checkhid(hid, site):
     else:
         return False
 
+def get_caseid(data):
+    soup = Soup(data)
+    #check if case type exist
+    try:
+        m = str(soup.case['case_id'])
+        return m
+    except:
+        return False
 
 def sanitise_case(site, data):
     soup = Soup(data)

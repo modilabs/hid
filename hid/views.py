@@ -166,16 +166,28 @@ def getid(request, mvp_site):
         site = Site.objects.get(slug=mvp_site)
     except Site.DoesNotExist:
         return HttpResponse(_(u"Site %s is not configured") % mvp_site)
-
+    print "kj"
+    '''
     data = request.raw_post_data
-    s = LoggedMessage()
-    s.text = data
-    s.direction = s.DIRECTION_INCOMING
-    s.site = site
-    s.save()
-    if site.slug == 'mvp-mwandama':
-        injectid.apply_async((), {'obj': s})
+    status = get_caseid(data)
+    if status:
+        try:
+            Cases.objects.get(case=status, site__pk=site)
+            m = True
+        except Cases.DoesNotExist:
+            m = False
 
+        if not m:
+            c = Cases.objects.create(case=status, site__pk=site)
+            c.save()
+            s = LoggedMessage()
+            s.text = data
+            s.direction = s.DIRECTION_INCOMING
+            s.site = site
+            s.save()
+            if site.slug == 'mvp-mwandama':
+                injectid.apply_async((), {'obj': s})
+    '''
 
 @login_required
 def ajax_progress(request):
@@ -191,4 +203,4 @@ def ajax_progress(request):
             progresses[r.pk] = r.task_progress
 
     return HttpResponse(simplejson.dumps([rows,progresses]), \
-                                mimetype="application/json")    
+                                mimetype="application/json")
