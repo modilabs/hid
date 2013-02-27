@@ -166,11 +166,11 @@ def getid(request, mvp_site):
         site = Site.objects.get(slug=mvp_site)
     except Site.DoesNotExist:
         return HttpResponse(_(u"Site %s is not configured") % mvp_site)
-    print "kj"
-    '''
+
     data = request.raw_post_data
     status = get_caseid(data)
     if status:
+        print status
         try:
             Cases.objects.get(case=status, site__pk=site)
             m = True
@@ -178,7 +178,7 @@ def getid(request, mvp_site):
             m = False
 
         if not m:
-            c = Cases.objects.create(case=status, site__pk=site)
+            c = Cases.objects.create(case=status, site=site)
             c.save()
             s = LoggedMessage()
             s.text = data
@@ -187,7 +187,12 @@ def getid(request, mvp_site):
             s.save()
             if site.slug == 'mvp-mwandama':
                 injectid.apply_async((), {'obj': s})
-    '''
+            return HttpResponse(_(u"Saved"))
+        else:
+            return HttpResponse(_(u"Already Saved"))
+    else:
+        return HttpResponse(_(u"Pass "))
+
 
 @login_required
 def ajax_progress(request):
