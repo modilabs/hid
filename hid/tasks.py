@@ -110,7 +110,7 @@ def injectid(obj):
         print p
         case_ = "household_head_health_id" if p['household'] else "health_id"
         case_type = p['form_type']
-        c = soup.find('case_')
+        c = soup.find(case_)
         mm = "<%s>%s</%s>" % (case_, hid.identifier, case_)
         c = str(c)
         soup = str(soup)
@@ -184,7 +184,7 @@ def injectid_crontab():
                     print p
                     case_ = "household_head_health_id" if p['household'] else "health_id"
                     case_type = p['form_type']
-                    c = soup.find('case_')
+                    c = soup.find(case_)
                     mm = "<%s>%s</%s>" % (case_, hid.identifier, case_)
                     c = str(c)
                     soup = str(soup)
