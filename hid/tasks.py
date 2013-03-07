@@ -8,7 +8,7 @@ from django.conf import settings
 from bs4 import BeautifulSoup as Soup
 
 from hid.models import Identifier, IssuedIdentifier, Site, IdentifierPrinted
-from hid.utils import *
+from hid.utils import *u
 from logger_ng.models import LoggedMessage
 
 from celery import task
