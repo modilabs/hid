@@ -37,12 +37,12 @@ from hid.tasks import printhid, injectid
 def index(request):
     '''Landing page '''
     context = RequestContext(request)
-    
-    site=request.session.get('assigned_site')
+
+    site = request.session.get('assigned_site')
     site = Site.objects.get(slug=site)
     total = IssuedIdentifier.objects.filter(site=site).count()
     issued = IssuedIdentifier.objects.filter(status=IssuedIdentifier.STATUS_ISSUED).count()
-    
+
     context.update({'total': total,
                     'ishome': True,
                     'issued': issued,
@@ -66,7 +66,7 @@ def login_greeter(request):
 @site_required
 def request_identifier(request):
     context = RequestContext(request)
-    site=request.session.get('assigned_site')
+    site = request.session.get('assigned_site')
     site = Site.objects.get(slug=site)
     form = IdentifierForm()
     if request.POST:
@@ -168,9 +168,14 @@ def getid(request, mvp_site):
         return HttpResponse(_(u"Site %s is not configured") % mvp_site)
 
     data = request.raw_post_data
+    s = LoggedMessage()
+    s.text = data
+    s.direction = s.DIRECTION_INCOMING
+    s.site = site
+    s.save()
+    '''
     status = get_caseid(data)
     if status:
-        print status
         try:
             Cases.objects.get(case=status, site__pk=site)
             m = True
@@ -192,6 +197,8 @@ def getid(request, mvp_site):
             return HttpResponse(_(u"Already Saved"))
     else:
         return HttpResponse(_(u"Pass "))
+    '''
+    return HttpResponse(_(u"Pass "))
 
 
 @login_required
@@ -207,5 +214,5 @@ def ajax_progress(request):
         if r.task_progress:
             progresses[r.pk] = r.task_progress
 
-    return HttpResponse(simplejson.dumps([rows,progresses]), \
-                                mimetype="application/json")
+    return HttpResponse(simplejson.dumps([rows, progresses]),
+                        mimetype="application/json")
