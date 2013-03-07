@@ -168,6 +168,12 @@ def getid(request, mvp_site):
         return HttpResponse(_(u"Site %s is not configured") % mvp_site)
 
     data = request.raw_post_data
+    s = LoggedMessage()
+    s.text = data
+    s.direction = s.DIRECTION_INCOMING
+    s.site = site
+    s.save()
+    '''
     status = get_caseid(data)
     if status:
         try:
@@ -191,6 +197,8 @@ def getid(request, mvp_site):
             return HttpResponse(_(u"Already Saved"))
     else:
         return HttpResponse(_(u"Pass "))
+    '''
+    return HttpResponse(_(u"Pass "))
 
 
 @login_required
