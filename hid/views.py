@@ -200,7 +200,6 @@ def getid(request, mvp_site):
         return HttpResponse(_(u"Pass "))
     
 
-
 @login_required
 def ajax_progress(request):
     site = request.session.get('assigned_site')
