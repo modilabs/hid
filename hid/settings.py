@@ -182,6 +182,7 @@ SUBMIT_TO_COMMCARE = True
 
 # celery
 BROKER_BACKEND = "rabbitmq"
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
 BROKER_USER = "myuser"

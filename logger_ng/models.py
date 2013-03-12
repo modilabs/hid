@@ -10,8 +10,9 @@ IncomingManager
 from django.db import models
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
-
+from django.db.models.signals import post_save
 from hid.models import Site
+from hid.tasks import advanced_injector
 
 
 class OutgoingManager(models.Manager):
@@ -134,3 +135,15 @@ class LoggedMessage(models.Model):
                 {'direction': self.get_direction_display(),
                  'site': self.site.name,
                  'text': self.text}
+
+
+def do_something(sender, **kwargs):
+    # the object which is saved can be accessed via kwargs 'instance' key.
+    obj = kwargs['instance']
+    if obj.site.slug == 'mvp-mwandama':
+        advanced_injector.apply_async((), {'obj': obj})
+
+# here we connect a post_save signal for MyModel
+# in other terms whenever an instance of MyModel is saved
+# the 'do_something' function will be called.
+post_save.connect(do_something, sender=LoggedMessage)

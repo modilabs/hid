@@ -169,12 +169,13 @@ def advanced_injector(obj):
 
                         z.status = s.STATUS_ERROR
                         z.save()
+                        return "HURRAY WRONG "
                 else:
-                    print "Wrong xml "
+                    return "Wrong xml "
             else:
-                print "Already Case exist"
+                return "Already Case exist"
         else:
-            print "Wrong xml. No case ID"
+            return "Wrong xml. No case ID"
 
 
 @task()
@@ -310,8 +311,8 @@ def injectid_crontab():
                         z.status = s.STATUS_ERROR
                         z.save()
                 else:
-                    print "Wrong xml "
+                    return "Wrong xml "
             else:
-                print "Already Case exist"
+                return "Already Case exist"
         else:
-            print "Wrong xml. No case ID"
+            return "Wrong xml. No case ID"

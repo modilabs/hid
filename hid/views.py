@@ -29,7 +29,7 @@ from hid.decorators import site_required
 from django.contrib.auth.decorators import login_required
 
 from hid.utils import *
-from hid.tasks import printhid, injectid
+from hid.tasks import printhid, advanced_injector
 
 
 @login_required
@@ -173,9 +173,7 @@ def getid(request, mvp_site):
     s.direction = s.DIRECTION_INCOMING
     s.site = site
     s.save()
-    if site.slug == 'mvp-mwandama':
-        advanced_injector.apply_async((), {'obj': s})
-
+    return HttpResponse(status=201)
     '''
     status = get_caseid(data)
     if status:
@@ -202,8 +200,7 @@ def getid(request, mvp_site):
     else:
         return HttpResponse(status=201)
     '''
-    return HttpResponse(status=201)
- 
+
 
 @login_required
 def ajax_progress(request):
