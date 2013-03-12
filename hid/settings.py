@@ -183,7 +183,17 @@ SUBMIT_TO_COMMCARE = True
 # celery
 BROKER_BACKEND = "rabbitmq"
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "myuser"
+BROKER_PASSWORD = "mypassword"
+BROKER_VHOST = "myvhost"
+
 CELERY_RESULT_BACKEND = "amqp" # telling Celery to report the results back to RabbitMQ
+CELERY_DISABLE_RATE_LIMITS = True
+CELERY_LOADER='django'
+CELERY_AMQP_TASK_RESULT_EXPIRES = 60*60
+CELERY_IMPORTS = ('hid.tasks',)
 
 try:
     from local_settings import *
