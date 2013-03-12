@@ -193,11 +193,13 @@ def getid(request, mvp_site):
             s.save()
             if site.slug == 'mvp-mwandama':
                 injectid.apply_async((), {'obj': s})
-            return HttpResponse(_(u"Saved"))
+            print _(u"Saved")
+            return HttpResponse(status=201)
         else:
-            return HttpResponse(_(u"Already Saved"))
+            print _(u"Already Saved")
+            return HttpResponse(status=201)
     else:
-        return HttpResponse(_(u"Pass "))
+        return HttpResponse(status=201)
     
 
 @login_required
