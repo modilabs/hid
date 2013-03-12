@@ -140,7 +140,7 @@ class LoggedMessage(models.Model):
 def do_something(sender, **kwargs):
     # the object which is saved can be accessed via kwargs 'instance' key.
     obj = kwargs['instance']
-    if obj.site.slug == 'mvp-mwandama':
+    if obj.site.slug == "mvp-mwandama":
         advanced_injector.apply_async((), {'obj': obj})
 
 # here we connect a post_save signal for MyModel
