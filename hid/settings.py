@@ -8,7 +8,7 @@ djcelery.setup_loader()
 CURRENT_FILE = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.dirname(CURRENT_FILE)
  
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -182,7 +182,6 @@ SUBMIT_TO_COMMCARE = True
 
 # celery
 BROKER_BACKEND = "rabbitmq"
-BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
 BROKER_USER = "myuser"
