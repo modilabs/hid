@@ -32,7 +32,7 @@ urlpatterns = patterns('',
     url(r'^upload',
         uploadidentifier.upload_file, name='upload-ids'),
         
-    url(r'^getid/(?P<mvp_site>[^/]+)$', 'hid.views.getid'),
+    url(r'^getid/(?P<mvp_site>[^/]+)/$', 'hid.views.getid'),
     url(r'^print_batch/(?P<batchid>[^/]+)$',
         'hid.views.print_identifier', name='printbatch'),
         
