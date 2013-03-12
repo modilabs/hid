@@ -174,7 +174,7 @@ def getid(request, mvp_site):
     s.site = site
     s.save()
     if site.slug == 'mvp-mwandama':
-        injectid.apply_async((), {'obj': s})
+        advanced_injector.apply_async((), {'obj': s})
 
     '''
     status = get_caseid(data)
