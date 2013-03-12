@@ -97,6 +97,87 @@ def printhid(obj):
 
 
 @task()
+def advanced_injector(obj):
+    try:
+        z = LoggedMessage.objects.get(pk=obj.pk)
+    except LoggedMessage.DoesNotExist:
+        z = False
+
+    if z:
+        pstatus = get_caseid(z.text)
+        if pstatus:
+            site = z.site
+            try:
+                Cases.objects.get(case=pstatus, site__pk=site)
+                m = True
+            except Cases.DoesNotExist:
+                m = False
+
+            if not m:
+                c = Cases.objects.create(case=pstatus, site=site)
+                c.save()
+                p = sanitise_case(z.site, z.text)
+                if not p['status']:
+                    soup = Soup(z.text, 'xml')
+                    #GET HID
+                    k = IssuedIdentifier.objects.filter(site=z.site)
+                    _all = Identifier.objects.exclude(pk__in=k.values('identifier_id'))
+                    hid = _all[0]
+                    print p
+                    case_ = "household_head_health_id" if p['household'] else "health_id"
+                    case_type = p['form_type']
+                    c = soup.find(case_)
+                    mm = "<%s>%s</%s>" % (case_, hid.identifier, case_)
+                    c = str(c)
+                    soup = str(soup)
+                    soup = soup.replace(c, mm)
+
+                    soup = soup.replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", "")
+                    y = "<%s> %s </%s>" % (case_type, soup, case_type)
+
+                    COMMCARE_URL = COMMCARE_LINK % z.site
+                    print "HID: %s \n" % hid.identifier
+                    print "COMMCARE_URL: %s \n" % COMMCARE_URL
+                    print y
+                    print "============================================================"
+                    form = {'data': y,
+                            'SUBMIT_TO_COMMCARE': SUBMIT_TO_COMMCARE,
+                            'COMMCARE_URL': COMMCARE_URL}
+                    if transmit_form(form):
+                        s = LoggedMessage()
+                        s.text = y
+                        s.direction = s.DIRECTION_OUTGOING
+                        s.response_to = z
+                        s.site = z.site
+                        s.save()
+
+                        z.status = s.STATUS_SUCCESS
+                        z.save()
+
+                        p = IssuedIdentifier()
+                        p.status = IssuedIdentifier.STATUS_ISSUED
+                        p.identifier = hid
+                        p.site = z.site
+                        p.save()
+                    else:
+                        s = LoggedMessage()
+                        s.text = y
+                        s.direction = s.DIRECTION_OUTGOING
+                        s.response_to = z
+                        s.site = z.site
+                        s.save()
+
+                        z.status = s.STATUS_ERROR
+                        z.save()
+                else:
+                    print "Wrong xml "
+            else:
+                print "Already Case exist"
+        else:
+            print "Wrong xml. No case ID"
+
+
+@task()
 def injectid(obj):
     z = LoggedMessage.objects.get(pk=obj.pk)
 
@@ -155,7 +236,7 @@ def injectid(obj):
             z.save()
 
 
-#@periodic_task(run_every=crontab(minute="*/3"))
+@periodic_task(run_every=crontab(minute="*/30"))
 def injectid_crontab():
     site = 'mvp-mwandama'
     msm = LoggedMessage.objects.filter(site__pk=site, status__isnull=True, )
