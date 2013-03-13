@@ -138,6 +138,20 @@ class Cases(models.Model):
         verbose_name_plural = _(u"Cases")
         unique_together = ('site', 'case')
 
+    TYPE_HOUSEHOLD = 'H'
+    TYPE_CHILD = 'C'
+    TYPE_PREGNANCY = 'P'
+    TYPE_OTHER = 'O'
+
+    TYPE_CHOICES = (
+        (TYPE_HOUSEHOLD, _(u"Household")),
+        (TYPE_CHILD, _(u"Child")),
+        (TYPE_OTHER, _(u"Other")),
+        (TYPE_PREGNANCY, _(u"Pregnancy")))
+        
     site = models.ForeignKey(Site, verbose_name=_(u"Assigned Site"))
     case = models.CharField(max_length=200, verbose_name=_(u"Case ID"))
+    case_type = models.CharField(_(u"Case Type"), choices=TYPE_CHOICES,
+                              max_length=1, blank=True, null=True)
+    text = models.TextField(_(u"More Information"))
     identifier = models.ForeignKey(Identifier, max_length=10, blank=True, null=True, unique=False)
