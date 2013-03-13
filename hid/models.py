@@ -153,5 +153,5 @@ class Cases(models.Model):
     case = models.CharField(max_length=200, verbose_name=_(u"Case ID"))
     case_type = models.CharField(_(u"Case Type"), choices=TYPE_CHOICES,
                               max_length=1, blank=True, null=True)
-    text = models.TextField(_(u"More Information"))
+    text = models.TextField(_(u"More Information"), blank=True, null=True)
     identifier = models.ForeignKey(Identifier, max_length=10, blank=True, null=True, unique=False)
