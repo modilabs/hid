@@ -10,8 +10,9 @@ IncomingManager
 from django.db import models
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from hid.models import Site
+from hid.utils import get_caseid
 
 
 class OutgoingManager(models.Manager):
@@ -137,13 +138,34 @@ class LoggedMessage(models.Model):
 
 
 from hid.tasks import advanced_injector
-def do_something(sender, **kwargs):
+def apply_hid(sender, **kwargs):
     # the object which is saved can be accessed via kwargs 'instance' key.
     obj = kwargs['instance']
     if obj.site.slug == "mvp-mwandama":
         advanced_injector.apply_async((), {'obj': obj})
 
+def validate(sender, **kwargs):
+    # the object which is saved can be accessed via kwargs 'instance' key.
+    obj = kwargs['instance']
+    status = get_caseid(obj.text)
+    site = obj.site
+    print status
+    if status:
+        try:
+            Cases.objects.get(case=status, site__pk=site)
+            m = True
+        except Cases.DoesNotExist:
+            m = False
+
+        if not m:
+            obj.save()
+        else:
+            pass
+    else:
+        pass
+
 # here we connect a post_save signal for MyModel
 # in other terms whenever an instance of MyModel is saved
 # the 'do_something' function will be called.
-post_save.connect(do_something, sender=LoggedMessage)
+pre_save.connect(validate, sender=LoggedMessage)
+post_save.connect(apply_hid, sender=LoggedMessage)

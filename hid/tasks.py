@@ -7,7 +7,6 @@ from django.db import IntegrityError
 from django.conf import settings
 from bs4 import BeautifulSoup as Soup
 
-from hid.models import Identifier, IssuedIdentifier, Site, IdentifierPrinted
 from hid.utils import *
 from logger_ng.models import LoggedMessage
 
