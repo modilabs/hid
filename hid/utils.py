@@ -12,7 +12,6 @@ from bs4 import BeautifulSoup as Soup
 from datetime import datetime
 
 from hid.models import *
-from logger_ng.models import LoggedMessage
 
 VALID_CHARS = "0123456789ACDEFGHJKLMNPRTUVWXY"
 LEN = 4

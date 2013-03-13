@@ -12,7 +12,6 @@ from django.utils import simplejson
 from django.utils.translation import ugettext as _
 from django.db.models.signals import post_save
 from hid.models import Site
-from hid.tasks import advanced_injector
 
 
 class OutgoingManager(models.Manager):
@@ -137,6 +136,7 @@ class LoggedMessage(models.Model):
                  'text': self.text}
 
 
+from hid.tasks import advanced_injector
 def do_something(sender, **kwargs):
     # the object which is saved can be accessed via kwargs 'instance' key.
     obj = kwargs['instance']
