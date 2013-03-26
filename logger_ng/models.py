@@ -141,8 +141,7 @@ from hid.tasks import advanced_injector
 def apply_hid(sender, **kwargs):
     # the object which is saved can be accessed via kwargs 'instance' key.
     obj = kwargs['instance']
-    if obj.site.slug == "mvp-mwandama":
-        advanced_injector.apply_async((), {'obj': obj})
+    advanced_injector.apply_async((), {'obj': obj})
 
 def validate(sender, **kwargs):
     # the object which is saved can be accessed via kwargs 'instance' key.
@@ -167,5 +166,5 @@ def validate(sender, **kwargs):
 # here we connect a post_save signal for MyModel
 # in other terms whenever an instance of MyModel is saved
 # the 'do_something' function will be called.
-pre_save.connect(validate, sender=LoggedMessage)
+#pre_save.connect(validate, sender=LoggedMessage)
 post_save.connect(apply_hid, sender=LoggedMessage)

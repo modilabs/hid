@@ -236,7 +236,7 @@ def injectid(obj):
             z.save()
 
 
-@periodic_task(run_every=crontab(minute="*/30"))
+#@periodic_task(run_every=crontab(minute="*/30"))
 def injectid_crontab():
     site = 'mvp-mwandama'
     msm = LoggedMessage.objects.filter(site__pk=site, status__isnull=True, )
