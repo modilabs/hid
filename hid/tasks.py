@@ -173,6 +173,7 @@ def advanced_injector(obj):
                         z.save()
                         return "HURRAY WRONG "
                 else:
+                    cc.delete()
                     return "Wrong xml "
             else:
                 return "Already Case exist"
