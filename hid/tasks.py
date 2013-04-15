@@ -316,7 +316,9 @@ def injectid_crontab():
                         z.status = s.STATUS_ERROR
                         z.save()
                 else:
+                    cc.delete()
                     return "Wrong xml "
+                    
             else:
                 return "Already Case exist"
         else:
