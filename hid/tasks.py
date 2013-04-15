@@ -113,8 +113,8 @@ def advanced_injector(obj):
                 m = False
 
             if not m:
-                c = Cases.objects.create(case=pstatus, site=site)
-                c.save()
+                cc = Cases.objects.create(case=pstatus, site=site)
+                cc.save()
                 p = sanitise_case(z.site, z.text)
                 if not p['status']:
                     soup = Soup(z.text, 'xml')
@@ -158,6 +158,9 @@ def advanced_injector(obj):
                         p.identifier = hid
                         p.site = z.site
                         p.save()
+                        
+                        cc.identifier = hid
+                        cc.save()
                     else:
                         s = LoggedMessage()
                         s.text = y
@@ -177,7 +180,7 @@ def advanced_injector(obj):
             return "Wrong xml. No case ID"
 
 
-@task()
+#@task()
 def injectid(obj):
     z = LoggedMessage.objects.get(pk=obj.pk)
 
@@ -254,8 +257,8 @@ def injectid_crontab():
                 m = False
 
             if not m:
-                c = Cases.objects.create(case=pstatus, site=site)
-                c.save()
+                cc = Cases.objects.create(case=pstatus, site=site)
+                cc.save()
                 p = sanitise_case(z.site, z.text)
                 if not p['status']:
                     soup = Soup(z.text, 'xml')
@@ -299,6 +302,9 @@ def injectid_crontab():
                         p.identifier = hid
                         p.site = z.site
                         p.save()
+                        
+                        cc.identifier = hid
+                        cc.save()
                     else:
                         s = LoggedMessage()
                         s.text = y
