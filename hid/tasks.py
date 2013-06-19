@@ -68,7 +68,7 @@ def printhid(obj):
     requested_id = obj.total_requested
     site = Site.objects.get(slug=obj.site)
     z = IssuedIdentifier.objects.filter(site=site)
-    _all = Identifier.objects.exclude(pk__in=z.values('identifier_id'))
+    _all = Identifier.objects.exclude(pk__in=z.values('identifier_id'))[:requested_id]
     loc = str(settings.DOWNLOADS_URL + str(obj.pk) + '_identifier.txt')
     file_name = os.path.abspath(loc)
     f = open(file_name, 'w+')
