@@ -39,10 +39,10 @@ def computeCheckDigit(identifier):
         mod = len(valid_chars)
         print identifier
 
-        # remove leading or trailing whitespace, convert to uppercase
+        # Remove leading or trailing whitespace, convert to uppercase
         identifier = identifier.strip().upper()
 
-        #this will be a running total
+        # This will be a running total
         sum = 0
 
         # loop through digits from right to left
@@ -91,7 +91,7 @@ def validateCheckDigit(identifier):
         # loop through digits from right to left
         for n, char in enumerate(reversed(identifier)):
             if not valid_chars.count(char):
-                #raise Exception('InvalidIDException')
+                # raise Exception('InvalidIDException')
                 return False
 
             # Point
@@ -119,7 +119,7 @@ def generateIdentifier():
     identifier = ''.join([random.choice(char) for i in range(0, slen - 1)])
     return generate(identifier)
 
- 
+
 def transmit_form(form):
     ''' Submit data to commcare server '''
     xml_form = form['data']
@@ -131,7 +131,7 @@ def transmit_form(form):
         print url
         up = urlparse(url)
         conn = httplib.HTTPSConnection(up.netloc) if url.startswith("https") \
-                                        else httplib.HTTPConnection(up.netloc)
+               else httplib.HTTPConnection(up.netloc)
         conn.request('POST', up.path, xml_form, headers)
         resp = conn.getresponse()
         responsetext = resp.read()
@@ -151,10 +151,12 @@ def valid_hid(hid):
         return False
     return True
 
+
 def oldvalid_hid(hid, site):
     ''' Check if HID exists in previous CHILDCOUNT IDs '''
     try:
-        p = IssuedIdentifier.objects.get(identifier__identifier=hid, site__slug=site)
+        p = IssuedIdentifier.objects.get(identifier__identifier=hid,
+                                         site__slug=site)
     except IssuedIdentifier.DoesNotExist:
         return False
 
@@ -162,35 +164,37 @@ def oldvalid_hid(hid, site):
     p.save()
     return True
 
+
 def checkhid(hid, site):
+    # Check if HID exist in childcount hid pool.
     if oldvalid_hid(hid, site):
-        #Check if HID exist in childcount hid pool.
         return True
     elif valid_hid(hid):
         hid = Identifier.objects.get(identifier=hid)
         site = Site.objects.get(slug=site)
         new = IssuedIdentifier()
-        new.identifier=hid
+        new.identifier = hid
         new.status = IssuedIdentifier.STATUS_ISSUED
         new.site = site
         new.save()
         return True
-        #check if HID exist in new generated IDs
     else:
         return False
 
+
 def get_caseid(data):
     soup = Soup(data)
-    #check if case type exist
+    # check if case type exist
     try:
         m = str(soup.case['case_id'])
         return m
     except:
         return False
 
+
 def sanitise_case(site, data):
+    # check if case type exist
     soup = Soup(data)
-    #check if case type exist
     try:
         m = soup.find('case_type')
         s = m.text.lower()
@@ -220,9 +224,12 @@ def sanitise_case(site, data):
                 household = False
             except:
                 return False
+        try:
+            hid_status = checkhid(old_hid, site)
+        except:
+            hid_status = False
 
-        z = checkhid(old_hid, site)
-        return {'status': False, 'form_type': s , 'household': household }
+        return {'status': hid_status, 'form_type': s, 'household': household}
     else:
         '''
         update form to indicate that it was not processed because it did

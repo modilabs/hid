@@ -84,11 +84,11 @@ def printhid(obj):
         p.site = site
         p.save()
 
-        #write identifier
+        # write identifier
         k = str(j.identifier) + ' \n'
         f.write(k)
 
-        #Add total
+        # Add total
         current += 1
         obj.task_progress = int(100.0 * current / requested_id)
         obj.save()
@@ -118,7 +118,7 @@ def advanced_injector(obj):
                 p = sanitise_case(z.site, z.text)
                 if not p['status']:
                     soup = Soup(z.text, 'xml')
-                    #GET HID
+                    # GET HID
                     k = IssuedIdentifier.objects.filter(site=z.site)
                     _all = Identifier.objects.exclude(pk__in=k.values('identifier_id'))
                     hid = _all[0]
@@ -126,7 +126,7 @@ def advanced_injector(obj):
                     case_ = "household_head_health_id" if p['household'] else "health_id"
                     case_type = p['form_type']
                     c = soup.find(case_)
-                    mm = "<%s>%s</%s>" % (case_, hid.identifier, case_)
+                    mm = "<update><%s>%s</%s></update>" % (case_, hid.identifier, case_)
                     c = str(c)
                     soup = str(soup)
                     soup = soup.replace(c, mm)
@@ -158,7 +158,7 @@ def advanced_injector(obj):
                         p.identifier = hid
                         p.site = z.site
                         p.save()
-                        
+
                         cc.identifier = hid
                         cc.save()
                     else:
@@ -181,14 +181,14 @@ def advanced_injector(obj):
             return "Wrong xml. No case ID"
 
 
-#@task()
+# @task()
 def injectid(obj):
     z = LoggedMessage.objects.get(pk=obj.pk)
 
     p = sanitise_case(z.site, z.text)
     if not p['status']:
         soup = Soup(z.text, 'xml')
-        #GET HID
+        # GET HID
         k = IssuedIdentifier.objects.filter(site=z.site)
         _all = Identifier.objects.exclude(pk__in=k.values('identifier_id'))
         hid = _all[0]
@@ -240,7 +240,7 @@ def injectid(obj):
             z.save()
 
 
-#@periodic_task(run_every=crontab(minute="*/30"))
+# @periodic_task(run_every=crontab(minute="*/30"))
 def injectid_crontab():
     site = 'mvp-mwandama'
     msm = LoggedMessage.objects.filter(site__pk=site, status__isnull=True, )
@@ -263,7 +263,7 @@ def injectid_crontab():
                 p = sanitise_case(z.site, z.text)
                 if not p['status']:
                     soup = Soup(z.text, 'xml')
-                    #GET HID
+                    # GET HID
                     k = IssuedIdentifier.objects.filter(site=z.site)
                     _all = Identifier.objects.exclude(pk__in=k.values('identifier_id'))
                     hid = _all[0]
@@ -303,7 +303,7 @@ def injectid_crontab():
                         p.identifier = hid
                         p.site = z.site
                         p.save()
-                        
+
                         cc.identifier = hid
                         cc.save()
                     else:
@@ -319,7 +319,7 @@ def injectid_crontab():
                 else:
                     cc.delete()
                     return "Wrong xml "
-                    
+
             else:
                 return "Already Case exist"
         else:
