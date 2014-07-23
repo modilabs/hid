@@ -15,7 +15,7 @@ class HIDProcessor:
     username = 'root'
     password = 'r00t'
     server = 'localhost'
-    db_name = 'hid_server'
+    db_name = 'hid_final'
     logPath = 'logs.log'    
     site_id = 'mvp-ruhiira'
     cnx = ""    
@@ -28,11 +28,11 @@ class HIDProcessor:
     
     def read_csv(self):
         try:                        
-            csv_data = csv.reader(open('data/Children_lean.csv', 'rb')) 
+            csv_data = csv.reader(open('data/child_household_pregnancy_Cases.csv', 'rb')) 
                           
             rowcount = len(list(csv_data))
             # print "rows count %i" %rowcount  
-            afile = open('data/Children_lean.csv', 'r+')
+            afile = open('data/child_household_pregnancy_Cases.csv', 'r+')
             csvReader1 = csv.reader(afile)
             
             validIDs = 0
@@ -55,8 +55,9 @@ class HIDProcessor:
                 fullCount += 1 
                 thisRow = csvReader1.next()
                 case_id = thisRow[0];
-                site_id = thisRow[1]
-                case_type = thisRow[2]                
+                case_type = thisRow[1]   
+                site_id = thisRow[2]
+                             
                 # switch case type:
                 if case_type == "child":
                     case_type = 'C'
@@ -140,6 +141,70 @@ values('%d', '%s', now(), 'I');""" % (id, self.site_id)
                      else:                         
                         identifiersToGenerate += 1  # generate
                         # insert into issued
+                        
+            # process pregnancyList
+            if len(pregnancyInvalidList) > 0:
+                 for the_case_id in pregnancyInvalidList:
+                     tobeAssignedNew += 1                
+                     query_new_identifier = """select id, identifier from hid_identifier where id not in 
+                     (select identifier_id from hid_issuedidentifier where site_id='%s') limit 1;""" % self.site_id    
+                     logging.info("query new hid SQL=> %s" % query_new_identifier)  
+                     cursor = self.cnx.cursor()
+                     cursor.execute(query_new_identifier)
+                     rows = cursor.fetchall()
+                     resultsCount = len(rows)
+                     if resultsCount > 0:  # a valid free identifier exists                          
+                         casesToFulfilInternally += 1
+                   # insert into issued
+                         id = rows[0][0]
+                         insert_new_issued = """insert into hid_issuedidentifier (identifier_id, site_id, issued_on, status)      
+values('%d', '%s', now(), 'I');""" % (id, self.site_id)    
+                         logging.info("health_id--- %s query insert issued  SQL=> %s" % (health_id, insert_new_issued))
+                         cursor.execute(insert_new_issued)
+                          # insert into cases
+                         insert_case = """insert into hid_cases_playground(site_id, `case`, identifier_id, case_type) values 
+                    ('%s', '%s', '%d', 'P')""" % (self.site_id, the_case_id, id)  
+                         logging.info("case--- %s query insert case  SQL=> %s" % (case_id, insert_case))
+                         cursor.execute(insert_case) 
+                   
+                     else:                         
+                        identifiersToGenerate += 1
+                        
+            # process ivalid householdList
+            if len(householdInvalidList) > 0:
+                 for the_case_id in householdInvalidList:
+                     tobeAssignedNew += 1                
+                     query_new_identifier = """select id, identifier from hid_identifier where id not in 
+                     (select identifier_id from hid_issuedidentifier where site_id='%s') limit 1;""" % self.site_id    
+                     logging.info("query new hid SQL=> %s" % query_new_identifier)  
+                     cursor = self.cnx.cursor()
+                     cursor.execute(query_new_identifier)
+                     rows = cursor.fetchall()
+                     resultsCount = len(rows)
+                     if resultsCount > 0:  # a valid free identifier exists                          
+                         casesToFulfilInternally += 1
+                   # insert into issued
+                         id = rows[0][0]
+                         insert_new_issued = """insert into hid_issuedidentifier (identifier_id, site_id, issued_on, status)      
+values('%d', '%s', now(), 'I');""" % (id, self.site_id)    
+                         logging.info("health_id--- %s query insert issued  SQL=> %s" % (health_id, insert_new_issued))
+                         cursor.execute(insert_new_issued)
+                          # insert into cases
+                         insert_case = """insert into hid_cases_playground(site_id, `case`, identifier_id, case_type) values 
+                    ('%s', '%s', '%d', 'H')""" % (self.site_id, the_case_id, id)  
+                         logging.info("case--- %s query insert case  SQL=> %s" % (case_id, insert_case))
+                         cursor.execute(insert_case) 
+                   
+                     else:                         
+                        identifiersToGenerate += 1
+            
+            
+            
+            
+            
+            
+             
+                        
                 # Replicate of pregnancy and household case types      
                      
             print 'valid: %d' % validIDs
