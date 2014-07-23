@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+"""HIDProcessor.py: This class processes cases and assigns health_id to cases that dont have """
+
+__author__ = "Josiah Njuki <jnjuki@cgcafrica.org>"
+__copyright__ = "Copyright 2014, Modi Labs"
+
+
 import mysql.connector
 import csv
 import logging
@@ -28,7 +36,7 @@ class HIDProcessor:
             csvReader1 = csv.reader(afile)
             
             validIDs = 0
-            invalidIDs= 0
+            invalidIDs = 0
             fullCount = 0
             tobeAssignedNew = 0
             casesToFulfilInternally = 0
@@ -92,8 +100,8 @@ class HIDProcessor:
                     logging.info("case--- %s query insert case  SQL=> %s" % (case_id, insert_case))
                     cursor.execute(insert_case)     
                              
-                else: #invalid health_ids case list
-                    #save empty/
+                else:  # invalid health_ids case list
+                    # save empty/
                     invalidIDs += 1
                     if case_type == "C":                        
                         childInvalidList.append(case_id)
@@ -104,13 +112,13 @@ class HIDProcessor:
                         householdInvalidList.append(case_id)    
             
             
-            #process invalid child list
+            # process invalid child list
             if len(childInvalidList) > 0:
                  for the_case_id in childInvalidList:
                      tobeAssignedNew += 1                
                      query_new_identifier = """select id, identifier from hid_identifier where id not in 
                      (select identifier_id from hid_issuedidentifier where site_id='%s') limit 1;""" % self.site_id    
-                     logging.info("query new hid SQL=> %s" %query_new_identifier)  
+                     logging.info("query new hid SQL=> %s" % query_new_identifier)  
                      cursor = self.cnx.cursor()
                      cursor.execute(query_new_identifier)
                      rows = cursor.fetchall()
@@ -130,17 +138,17 @@ values('%d', '%s', now(), 'I');""" % (id, self.site_id)
                          cursor.execute(insert_case) 
                    
                      else:                         
-                        identifiersToGenerate += 1                       # generate
+                        identifiersToGenerate += 1  # generate
                         # insert into issued
-                #Replicate of pregnancy and household case types      
+                # Replicate of pregnancy and household case types      
                      
             print 'valid: %d' % validIDs
             print 'invalid: %d' % invalidIDs
             print 'valid and issued: %d' % validAndIssued
             print 'validButNotMarkedAsIssued: %d' % validButNotMarkedAsIssued
-            print 'child invalid: %d' %len(childInvalidList)
-            print 'pregnancy invalid: %d' %len(pregnancyInvalidList)
-            print 'household invalid: %d' %len(householdInvalidList)
+            print 'child invalid: %d' % len(childInvalidList)
+            print 'pregnancy invalid: %d' % len(pregnancyInvalidList)
+            print 'household invalid: %d' % len(householdInvalidList)
             print 'tobeAssignedNew: %d' % tobeAssignedNew
             print 'cases fulfilled internally: %d' % casesToFulfilInternally
             print 'cases to generate new identifiers: %d' % identifiersToGenerate
