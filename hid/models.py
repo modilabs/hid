@@ -136,7 +136,6 @@ class Cases(models.Model):
         app_label = "hid"
         verbose_name = _(u"Case")
         verbose_name_plural = _(u"Cases")
-        unique_together = ('site', 'case')
 
     TYPE_HOUSEHOLD = 'H'
     TYPE_CHILD = 'C'

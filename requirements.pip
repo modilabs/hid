@@ -4,11 +4,10 @@ requests
 simplejson
 south
 django-extensions
-django-reversion
+django-reversion==1.6.5
 Pillow
 elaphe
 lxml
 beautifulsoup4
 celery
 django-celery
-
