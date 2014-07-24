@@ -108,10 +108,9 @@ class HIDProcessor:
                     invalidIDs += 1
                     if case_type == "C":                        
                         childInvalidList.append(case_id)
-                    elif case_type == "H":
-                        pregnancyInvalidList.append(case_id)           
-                        
                     elif case_type == "P":
+                        pregnancyInvalidList.append(case_id)         
+                    elif case_type == "H":
                         householdInvalidList.append(case_id)    
             
             
@@ -174,7 +173,7 @@ values('%d', '%s', now(), 'I');""" % (id, self.site_id)
                      else:                         
                         identifiersToGenerate += 1
                         
-            # process ivalid householdList
+            # process invalid householdList
             if len(householdInvalidList) > 0:
                  for the_case_id in householdInvalidList:
                      tobeAssignedNew += 1                
@@ -201,16 +200,8 @@ values('%d', '%s', now(), 'I');""" % (id, self.site_id)
                          cursor.execute(insert_case) 
                    
                      else:                         
-                        identifiersToGenerate += 1
-            
-            
-            
-            
-            
-            
-             
-                        
-                # Replicate of pregnancy and household case types      
+                        identifiersToGenerate += 1    
+         
                      
             print 'valid: %d' % validIDs
             print 'invalid: %d' % invalidIDs
