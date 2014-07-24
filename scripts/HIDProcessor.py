@@ -85,6 +85,7 @@ class HIDProcessor:
                     rows = cursor.fetchall()
                     resultsCount = len(rows)
                     if resultsCount > 0:
+                        issuedID = rows[0][0]
                         validAndIssued += 1
                     else:
                         # For the valid but un-issued, insert into issuedidentifier
@@ -93,11 +94,12 @@ class HIDProcessor:
  values('%d', '%s', now(), 'I');""" % (id, self.site_id)    
                         logging.info("health_id--- %s query insert issued  SQL=> %s" % (health_id, insert_not_issued))
                         cursor.execute(insert_not_issued)
+                        issuedID = cursor.lastrowid
                     
                 
                     # insert into cases
-                    insert_case = """insert into hid_cases_playground(site_id, `case`, identifier_id, case_type) values 
-                    ('%s', '%s', '%d', '%s')""" % (self.site_id, case_id, id, case_type)  
+                    insert_case = """insert into hid_cases_playground(`case`, issued_id_id, case_type) values 
+                    ('%s', '%d', '%s')""" % (case_id, issuedID, case_type)  
                     logging.info("case--- %s query insert case  SQL=> %s" % (case_id, insert_case))
                     cursor.execute(insert_case)     
                              
@@ -132,9 +134,10 @@ class HIDProcessor:
 values('%d', '%s', now(), 'I');""" % (id, self.site_id)    
                          logging.info("health_id--- %s query insert issued  SQL=> %s" % (health_id, insert_new_issued))
                          cursor.execute(insert_new_issued)
+                         issuedID = cursor.lastrowid
                           # insert into cases
-                         insert_case = """insert into hid_cases_playground(site_id, `case`, identifier_id, case_type) values 
-                    ('%s', '%s', '%d', 'C')""" % (self.site_id, the_case_id, id)  
+                         insert_case = """insert into hid_cases_playground( `case`, issued_id_id, case_type) values 
+                    ('%s', '%d', 'C')""" % (the_case_id, issuedID)  
                          logging.info("case--- %s query insert case  SQL=> %s" % (case_id, insert_case))
                          cursor.execute(insert_case) 
                    
@@ -161,9 +164,10 @@ values('%d', '%s', now(), 'I');""" % (id, self.site_id)
 values('%d', '%s', now(), 'I');""" % (id, self.site_id)    
                          logging.info("health_id--- %s query insert issued  SQL=> %s" % (health_id, insert_new_issued))
                          cursor.execute(insert_new_issued)
+                         issuedID = cursor.lastrowid
                           # insert into cases
-                         insert_case = """insert into hid_cases_playground(site_id, `case`, identifier_id, case_type) values 
-                    ('%s', '%s', '%d', 'P')""" % (self.site_id, the_case_id, id)  
+                         insert_case = """insert into hid_cases_playground( `case`, issued_id_id, case_type) values 
+                    ('%s', '%d', 'P')""" % (the_case_id, issuedID)    
                          logging.info("case--- %s query insert case  SQL=> %s" % (case_id, insert_case))
                          cursor.execute(insert_case) 
                    
@@ -189,9 +193,10 @@ values('%d', '%s', now(), 'I');""" % (id, self.site_id)
 values('%d', '%s', now(), 'I');""" % (id, self.site_id)    
                          logging.info("health_id--- %s query insert issued  SQL=> %s" % (health_id, insert_new_issued))
                          cursor.execute(insert_new_issued)
+                         issuedID = cursor.lastrowid
                           # insert into cases
-                         insert_case = """insert into hid_cases_playground(site_id, `case`, identifier_id, case_type) values 
-                    ('%s', '%s', '%d', 'H')""" % (self.site_id, the_case_id, id)  
+                         insert_case = """insert into hid_cases_playground(`case`, issued_id_id, case_type) values 
+                    ('%s', '%d', 'H')""" % (the_case_id, issuedID)     
                          logging.info("case--- %s query insert case  SQL=> %s" % (case_id, insert_case))
                          cursor.execute(insert_case) 
                    
