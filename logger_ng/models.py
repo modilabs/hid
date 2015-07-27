@@ -141,7 +141,10 @@ from hid.tasks import advanced_injector
 def apply_hid(sender, **kwargs):
     # the object which is saved can be accessed via kwargs 'instance' key.
     obj = kwargs['instance']
-    advanced_injector.apply_async((), {'obj': obj})
+    print obj.direction
+    if obj.direction == LoggedMessage.DIRECTION_INCOMING:
+        advanced_injector.apply_async((), {'obj': obj})
+
 
 def validate(sender, **kwargs):
     # the object which is saved can be accessed via kwargs 'instance' key.

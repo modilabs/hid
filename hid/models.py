@@ -149,7 +149,8 @@ class Cases(models.Model):
         (TYPE_PREGNANCY, _(u"Pregnancy")))
 
     case = models.CharField(max_length=200, verbose_name=_(u"Case ID"))
+    site = models.ForeignKey(Site, verbose_name=_(u"Assigned Site"), blank=True, null=True)
     issued_id = models.ForeignKey(IssuedIdentifier, max_length=10, blank=True, null=True, unique=False)
     case_type = models.CharField(_(u"Case Type"), choices=TYPE_CHOICES,
-                              max_length=1, blank=True, null=True)
+                                 max_length=1, blank=True, null=True)
     text = models.TextField(_(u"More Information"), blank=True, null=True)

@@ -2,19 +2,23 @@
 # maintainer: katembu
 
 import os
-
 from urlparse import urlparse
 import httplib
 import math
 import random
-
-from bs4 import BeautifulSoup as Soup
+import codecs
 from datetime import datetime
+from django.template import Context, Template
+import uuid
+from bs4 import BeautifulSoup as Soup
 
 from hid.models import *
 
+
+ISO_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
 VALID_CHARS = "0123456789ACDEFGHJKLMNPRTUVWXY"
-LEN = 4
+LEN = 3
 
 
 def getBaseCharacters():
@@ -131,7 +135,7 @@ def transmit_form(form):
         print url
         up = urlparse(url)
         conn = httplib.HTTPSConnection(up.netloc) if url.startswith("https") \
-               else httplib.HTTPConnection(up.netloc)
+            else httplib.HTTPConnection(up.netloc)
         conn.request('POST', up.path, xml_form, headers)
         resp = conn.getresponse()
         responsetext = resp.read()
@@ -141,6 +145,31 @@ def transmit_form(form):
         else:
             print "Bad response text: %s " % responsetext
             return False
+
+
+def xml_template_upload(form, domain_url):
+    ''' Submit data to commcare server '''
+
+    xml_form = form.render()
+    headers = {"Content-type": "text/xml", "Accept": "text/plain"}
+
+    xml_form = xml_form.encode('utf-8')
+    url = domain_url
+    up = urlparse(url)
+    conn = httplib.HTTPSConnection(up.netloc) if url.startswith("https") \
+        else httplib.HTTPConnection(up.netloc)
+    conn.request('POST', up.path, xml_form, headers)
+    resp = conn.getresponse()
+    responsetext = resp.read()
+    if resp.status == 502:
+        print "Retrying ..."
+        transmit_form(form, domain_url)
+    elif resp.status == 201:
+        print "Thanks for submitting %s " % responsetext
+        return True
+    else:
+        print "Bad HTTP Response: [%s] %s " % (resp.status, responsetext)
+        return False
 
 
 def valid_hid(hid):
@@ -236,3 +265,73 @@ def sanitise_case(site, data):
         not specify have case_type
         '''
         return {'status': True}
+
+
+class CaseXMLInterface(object):
+    template_name = ""
+    data = {}
+
+    def __init__(self, data, template):
+
+        # load template
+        self.data = data
+        self.data['uuid'] = uuid.uuid4().hex
+        self.data['timeend'] = self._format_datetime(datetime.utcnow())
+        self.template_name = template
+        self.load_template()
+
+    def _format_datetime(self, time):
+        return time.strftime(ISO_FORMAT)
+
+    def set_template(self, set_temp):
+        return set_temp
+
+    def load_template(self):
+        fp = codecs.open('%(template)s' % {'template': self.template_name})
+        self.template = Template(fp.read())
+        fp.close()
+
+    def render(self):
+        ''' returns the CaseXML formatted Form to Submit to Commcare '''
+        rendered = self.template.render(Context(self.data))
+        return rendered
+
+
+def check_file(file_name, ftype):
+    exist = True
+    if not os.path.exists(file_name):
+        exist = False
+    if file_name.split(".")[-1] != ftype:
+        exist = False
+
+    return exist
+
+
+'''
+from logger_ng.models import LoggedMessage
+def generate_caselist(site):
+    data = {}
+    try:
+        site = Site.objects.get(slug=site)
+    except Site.DoesNotExist:
+        return {'Site': False}
+
+    messages = LoggedMessage.objects.filter(direction=self.DIRECTION_OUTGOING,
+                                            site = site)[0]
+    if(messages.count() > 0):
+        for m in messages:
+            m = Soup(m.text)
+            try:
+                p = [tag.attrs for tag in m.findAll('case')]
+                z = p[0]['case_id']
+            except:
+                return {'Site': "Error"}
+
+            if(z):
+                data.update({z:z})
+        f = open('case_to/'+site.name+'.txt', 'w+')
+        for d in data:
+            k = str(data[d]) + ' \n'
+            f.write(k)
+        f.close()
+'''

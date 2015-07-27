@@ -16,9 +16,10 @@ from celery.task import periodic_task
 
 SUBMIT_TO_COMMCARE = True
 COMMCARE_LINK = "https://www.commcarehq.org/a/%s/receiver/"
+HOUSEHOLD_XFORM = "xform_template/household.xml"
+OTHERS_XFORM = "xform_template/other.xml"
 
 
-@task()
 def generate_id(size):
     for x in range(size):
         ident = generateIdentifier()
@@ -97,6 +98,7 @@ def printhid(obj):
 
 @task()
 def advanced_injector(obj):
+    info = {}
     try:
         z = LoggedMessage.objects.get(pk=obj.pk)
     except LoggedMessage.DoesNotExist:
@@ -117,61 +119,50 @@ def advanced_injector(obj):
                 cc.save()
                 p = sanitise_case(z.site, z.text)
                 if not p['status']:
-                    soup = Soup(z.text, 'xml')
                     # GET HID
                     k = IssuedIdentifier.objects.filter(site=z.site)
                     _all = Identifier.objects.exclude(pk__in=k.values('identifier_id'))
                     hid = _all[0]
-                    print p
-                    case_ = "household_head_health_id" if p['household'] else "health_id"
-                    case_type = p['form_type']
-                    c = soup.find(case_)
-                    mm = "<update><%s>%s</%s></update>" % (case_, hid.identifier, case_)
-                    c = str(c)
-                    soup = str(soup)
-                    soup = soup.replace(c, mm)
+                    info['caseid'] = pstatus
+                    info['health_id'] = hid.identifier
+                    if p['form_type'] == 'child' or p['form_type'] == 'pregnancy' or p['form_type'] == 'household':
+                        xml_template = HOUSEHOLD_XFORM if p['household'] else OTHERS_XFORM
+                        if check_file(xml_template, "xml"):
+                            form = CaseXMLInterface(info, xml_template)
+                            COMMCARE_URL = COMMCARE_LINK % z.site
+                            print COMMCARE_URL
+                            if xml_template_upload(form, COMMCARE_URL):
+                                s = LoggedMessage()
+                                s.text = form.render()
+                                s.direction = s.DIRECTION_OUTGOING
+                                s.response_to = z
+                                s.site = z.site
+                                s.save()
 
-                    soup = soup.replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", "")
-                    y = "<%s> %s </%s>" % (case_type, soup, case_type)
+                                LoggedMessage.objects.filter(pk=obj.pk).update(status=LoggedMessage.STATUS_SUCCESS)
+                                #z.save()
 
-                    COMMCARE_URL = COMMCARE_LINK % z.site
-                    print "HID: %s \n" % hid.identifier
-                    print "COMMCARE_URL: %s \n" % COMMCARE_URL
-                    print y
-                    print "============================================================"
-                    form = {'data': y,
-                            'SUBMIT_TO_COMMCARE': SUBMIT_TO_COMMCARE,
-                            'COMMCARE_URL': COMMCARE_URL}
-                    if transmit_form(form):
-                        s = LoggedMessage()
-                        s.text = y
-                        s.direction = s.DIRECTION_OUTGOING
-                        s.response_to = z
-                        s.site = z.site
-                        s.save()
+                                issued_id = IssuedIdentifier()
+                                issued_id.status = IssuedIdentifier.STATUS_ISSUED
+                                issued_id.identifier = hid
+                                issued_id.site = z.site
+                                issued_id.save()
 
-                        z.status = s.STATUS_SUCCESS
-                        z.save()
-
-                        p = IssuedIdentifier()
-                        p.status = IssuedIdentifier.STATUS_ISSUED
-                        p.identifier = hid
-                        p.site = z.site
-                        p.save()
-
-                        cc.identifier = hid
-                        cc.save()
-                    else:
-                        s = LoggedMessage()
-                        s.text = y
-                        s.direction = s.DIRECTION_OUTGOING
-                        s.response_to = z
-                        s.site = z.site
-                        s.save()
-
-                        z.status = s.STATUS_ERROR
-                        z.save()
-                        return "HURRAY WRONG "
+                                if p['form_type'] == 'child':
+                                    case_t = Cases.TYPE_CHILD
+                                if p['form_type'] == 'pregnancy':
+                                    case_t = Cases.TYPE_PREGNANCY
+                                if p['form_type'] == 'household':
+                                    case_t = Cases.TYPE_HOUSEHOLD
+                                cc.case_type = case_t
+                                cc.identifier = issued_id
+                                cc.save()
+                            else:
+                                cc.delete()
+                                LoggedMessage.objects.filter(pk=obj.pk).update(status=LoggedMessage.LoggedMessage.STATUS_ERROR)
+                                #z.status = LoggedMessage.STATUS_ERROR
+                                #z.save()
+                                return "HURRAY WRONG "
                 else:
                     cc.delete()
                     return "Wrong xml "
