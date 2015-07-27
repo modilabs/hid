@@ -307,9 +307,8 @@ def check_file(file_name, ftype):
     return exist
 
 
-'''
-from logger_ng.models import LoggedMessage
 def generate_caselist(site):
+    from logger_ng.models import LoggedMessage
     data = {}
     try:
         site = Site.objects.get(slug=site)
@@ -317,7 +316,7 @@ def generate_caselist(site):
         return {'Site': False}
 
     messages = LoggedMessage.objects.filter(direction=self.DIRECTION_OUTGOING,
-                                            site = site)[0]
+                                            site=site)[0]
     if(messages.count() > 0):
         for m in messages:
             m = Soup(m.text)
@@ -326,12 +325,11 @@ def generate_caselist(site):
                 z = p[0]['case_id']
             except:
                 return {'Site': "Error"}
-
             if(z):
-                data.update({z:z})
-        f = open('case_to/'+site.name+'.txt', 'w+')
+                data.update({z: z})
+                print ">>>> "  z
+        f = open('cases_to/' + site.name + '.txt', 'w+')
         for d in data:
             k = str(data[d]) + ' \n'
             f.write(k)
         f.close()
-'''
